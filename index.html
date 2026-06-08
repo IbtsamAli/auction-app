@@ -212,7 +212,7 @@
   // ===== BACKEND CONNECTION (Supabase) =====
   // Paste your two values between the quotes below, then deploy.
   const SUPABASE_URL = "https://nieybhvdaxrqfmzflgvb.supabase.co";   // <-- your Project URL (check it matches yours)
-  const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_PUBLIC_KEY_HERE";        // <-- paste your anon / public key here
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pZXliaHZkYXhycWZtemZsZ3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjU3ODEsImV4cCI6MjA5NjQ0MTc4MX0.4TrZ3OTjAgtNq9vrbBQtswYGd1J_XySdzREQUoezFFQ";        // <-- paste your anon / public key here
   let sb=null;
   try{ if(window.supabase && SUPABASE_URL.indexOf('http')===0 && SUPABASE_ANON_KEY.indexOf('PASTE')!==0){ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } }catch(e){ console.error('supabase init',e); }
   function lget(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
