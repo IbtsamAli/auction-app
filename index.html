@@ -4,53 +4,58 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Verified Auto Auctions</title>
-<style>html,body{margin:0;padding:0;background:#0a0e14}</style>
-</head>
-<body>
-<div id="vaa">
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
   :root{--bg:#0a0e14;--panel:#111722;--panel2:#19212e;--line:#26303f;--ink:#eaf0f7;--dim:#93a1b5;--faint:#5c6b80;--acc:#1fd6a6;--acc2:#36a3ff;--gold:#f6c560;--red:#ff5f6d;--amber:#ffac3b;--mono:'JetBrains Mono',monospace;--sans:'Sora',system-ui,sans-serif}
   *{box-sizing:border-box}
-  #vaa{font-family:var(--sans);color:var(--ink);background:var(--bg);min-height:100%;line-height:1.5}
-  #vaa button{font-family:var(--sans);cursor:pointer}#vaa input,#vaa select,#vaa textarea{font-family:var(--sans)}
+  html,body{margin:0;padding:0;background:var(--bg)}
+  body{font-family:var(--sans);color:var(--ink);line-height:1.5}
+  button{cursor:pointer;font-family:var(--sans)}input,select,textarea{font-family:var(--sans)}
   .vw{max-width:1180px;margin:0 auto;padding:0 16px}
   .hd{position:sticky;top:0;z-index:30;background:rgba(10,14,20,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
-  .hd .vw{display:flex;align-items:center;gap:14px;height:58px}
+  .hd .vw{display:flex;align-items:center;gap:12px;height:58px}
   .brand{font-weight:800;font-size:18px;letter-spacing:-.02em;display:flex;align-items:center;gap:8px;cursor:pointer}
   .brand .tick{width:22px;height:22px;border-radius:6px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:grid;place-items:center;color:#04130f;font-size:13px;font-weight:800}
-  .nav{display:flex;gap:4px;margin-left:4px;font-size:14px}
-  .nav a{cursor:pointer;color:var(--dim);padding:7px 10px;border-radius:8px}.nav a:hover{color:var(--ink);background:var(--panel)}.nav a.on{color:var(--ink);background:var(--panel2)}
+  .nav{display:flex;gap:3px;margin-left:4px;font-size:14px}
+  .nav a{cursor:pointer;color:var(--dim);padding:7px 9px;border-radius:8px}.nav a:hover{color:var(--ink);background:var(--panel)}.nav a.on{color:var(--ink);background:var(--panel2)}
   .hd .spacer{flex:1}
-  .who{font-size:13px;color:var(--dim);font-family:var(--mono);display:flex;align-items:center;gap:8px}
+  .bell{position:relative;background:transparent;border:none;color:var(--dim);font-size:18px;padding:4px 8px}.bell:hover{color:var(--ink)}
+  .bell .dot{position:absolute;top:0;right:3px;min-width:16px;height:16px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;font-family:var(--mono);display:none;place-items:center;padding:0 4px}
+  .bell .dot.on{display:grid}
+  .notifpop{position:absolute;top:54px;right:60px;width:300px;max-width:90vw;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.5);z-index:40;display:none;overflow:hidden}
+  .notifpop.on{display:block}
+  .notifpop h5{margin:0;padding:13px 15px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);border-bottom:1px solid var(--line)}
+  .notifpop .nlist{max-height:320px;overflow-y:auto}
+  .notifpop .ni{padding:11px 15px;border-bottom:1px solid var(--line);font-size:13px}.notifpop .ni .tm{font-size:10px;color:var(--faint);font-family:var(--mono);margin-top:3px}
+  .who{font-size:13px;color:var(--dim);font-family:var(--mono)}
   .btn{border:none;border-radius:10px;font-weight:700;font-size:14px;padding:9px 15px;transition:.15s}
   .btn-acc{background:linear-gradient(135deg,var(--acc),var(--acc2));color:#04130f}.btn-acc:hover{filter:brightness(1.08)}
   .btn-ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}.btn-ghost:hover{border-color:var(--acc)}
   .btn-sm{padding:6px 11px;font-size:13px;border-radius:8px}
-  @media(max-width:840px){.nav a{padding:7px 7px;font-size:12px}.brand span.full,.who{display:none}}
+  @media(max-width:880px){.nav a{padding:7px 6px;font-size:12px}.brand span.full,.who{display:none}.notifpop{right:12px}}
   .view{display:none;animation:fade .25s}.view.on{display:block}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
-  .hero{padding:42px 0 18px;background:radial-gradient(circle at 18% 0%,rgba(31,214,166,.13),transparent 46%),radial-gradient(circle at 100% 10%,rgba(54,163,255,.1),transparent 44%)}
+  .hero{padding:40px 0 18px;background:radial-gradient(circle at 18% 0%,rgba(31,214,166,.13),transparent 46%),radial-gradient(circle at 100% 10%,rgba(54,163,255,.1),transparent 44%)}
   .hero h1{font-size:clamp(27px,5vw,42px);font-weight:800;letter-spacing:-.03em;margin:0 0 12px;max-width:18ch}
   .hero h1 .g{background:linear-gradient(120deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
-  .hero p{color:var(--dim);font-size:16px;max-width:54ch;margin:0 0 18px}
-  .hero .row{display:flex;gap:12px;flex-wrap:wrap}
+  .hero p{color:var(--dim);font-size:16px;max-width:54ch;margin:0 0 18px}.hero .row{display:flex;gap:12px;flex-wrap:wrap}
   .sec{padding:26px 0 6px}.sec h2{font-size:18px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:10px}.sec .sub{color:var(--faint);font-size:13px;margin:0 0 16px}
   .ph2{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
   .pill{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.06em}
   .p-live{background:rgba(255,95,109,.15);color:var(--red)}.p-opp{background:rgba(31,214,166,.15);color:var(--acc)}.p-ver{background:rgba(54,163,255,.15);color:var(--acc2)}.p-pend{background:rgba(255,172,59,.15);color:var(--amber)}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.cards{grid-template-columns:1fr}}
-  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:.18s}.card:hover{transform:translateY(-3px);border-color:var(--acc)}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:16px;overflow:hidden;transition:.18s;position:relative}.card:hover{transform:translateY(-3px);border-color:var(--acc)}
   .ph{height:144px;position:relative;display:grid;place-items:center;cursor:pointer}.ph svg{width:78%;opacity:.92}
   .ph .ver{position:absolute;top:10px;left:10px}
   .ph .cnt{position:absolute;bottom:10px;right:10px;font-family:var(--mono);font-size:12px;font-weight:700;background:rgba(10,14,20,.75);padding:4px 9px;border-radius:8px}
-  .ph .star{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:8px;background:rgba(10,14,20,.6);border:none;color:var(--dim);font-size:15px}.ph .star.on{color:var(--gold)}
+  .ph .acts{position:absolute;top:8px;right:8px;display:flex;gap:6px}
+  .ph .ico{width:30px;height:30px;border-radius:8px;background:rgba(10,14,20,.6);border:none;color:var(--dim);font-size:14px}.ph .ico.on{color:var(--gold)}.ph .ico.cmp.on{color:var(--acc2)}
   .cb{padding:13px 14px 15px;cursor:pointer}.cb h3{margin:0 0 2px;font-size:15px;font-weight:700}.cb .meta{color:var(--faint);font-size:12px;font-family:var(--mono);margin-bottom:10px}
   .cb .bidrow{display:flex;justify-content:space-between;align-items:flex-end}.cb .bl{font-size:10px;color:var(--faint);text-transform:uppercase;letter-spacing:.08em}.cb .bv{font-family:var(--mono);font-weight:700;font-size:19px}
   .opp{font-family:var(--mono);font-size:11px;font-weight:700;color:var(--acc);background:rgba(31,214,166,.1);border:1px solid rgba(31,214,166,.3);padding:4px 8px;border-radius:8px}
   .res{font-size:10px;font-family:var(--mono);margin-top:8px}.res.met{color:var(--acc)}.res.no{color:var(--amber)}
-  .filters{display:flex;gap:10px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:18px}
+  .filters{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:18px}
   .filters .f{display:flex;flex-direction:column;gap:4px}.filters label{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
-  .ctrl{background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:14px;padding:9px 11px;outline:none}.ctrl:focus{border-color:var(--acc)}.filters .grow{flex:1;min-width:140px}
+  .ctrl{background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:14px;padding:9px 11px;outline:none}.ctrl:focus{border-color:var(--acc)}.filters .grow{flex:1;min-width:130px}
   .box{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}.box.flat{background:var(--panel2)}
   .box h4{margin:0 0 12px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim);font-weight:700}
   .fld{margin-bottom:13px}.fld label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--faint);margin-bottom:5px}
@@ -63,10 +68,13 @@
   .stat .s{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px}.stat .s .n{font-family:var(--mono);font-size:23px;font-weight:700}.stat .s .l{font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
   .empty{color:var(--faint);font-size:14px;text-align:center;padding:34px}
   .kyc{display:flex;align-items:center;gap:12px;background:rgba(54,163,255,.08);border:1px solid rgba(54,163,255,.25);border-radius:12px;padding:13px 16px;margin-bottom:18px;font-size:13px;color:var(--dim)}
+  .ssrow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer}.ssrow:last-child{border:none}
+  .bar{display:flex;align-items:flex-end;gap:9px;height:150px;padding:18px 0 22px}.bar .b{flex:1;background:linear-gradient(180deg,var(--acc),var(--acc2));border-radius:7px 7px 0 0;position:relative;min-height:6px}.bar .b span{position:absolute;top:-17px;left:0;right:0;text-align:center;font-family:var(--mono);font-size:10px;color:var(--dim)}.bar .b em{position:absolute;bottom:-20px;left:0;right:0;text-align:center;font-size:10px;color:var(--faint);font-style:normal;font-family:var(--mono)}
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}.gallery .g{aspect-ratio:4/3;border-radius:8px;background:linear-gradient(135deg,#1b2838,#0f1722);display:grid;place-items:center}.gallery .g svg{width:70%;opacity:.5}
   .ov{position:fixed;inset:0;z-index:50;background:rgba(4,7,11,.74);backdrop-filter:blur(6px);display:none;overflow-y:auto;padding:24px 12px}.ov.on{display:block}
   .dt{max-width:960px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:20px;overflow:hidden}
   .dt .x{position:sticky;top:0;float:right;margin:12px;z-index:5;width:34px;height:34px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:17px}
-  .dt-hero{height:210px;display:grid;place-items:center;position:relative}.dt-hero svg{width:46%}
+  .dt-hero{height:200px;display:grid;place-items:center;position:relative}.dt-hero svg{width:44%}
   .dt-body{padding:22px}.dt-body h2{margin:0 0 3px;font-size:22px;font-weight:800;letter-spacing:-.02em}.dt-body .meta{font-family:var(--mono);color:var(--dim);font-size:13px;margin-bottom:18px}
   .dgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}@media(max-width:760px){.dgrid{grid-template-columns:1fr}}
   .spec{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;font-size:13px}.spec .k{color:var(--faint)}.spec .v{text-align:right;font-family:var(--mono)}
@@ -74,28 +82,33 @@
   .timer-l{text-align:center;font-size:10px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
   .cur{text-align:center;margin:14px 0}.cur .bv{font-family:var(--mono);font-size:31px;font-weight:700}.cur .rs{font-size:11px;font-family:var(--mono)}
   .bidbar{display:flex;gap:8px;margin-top:12px}.bidbar input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:var(--mono);font-size:15px;padding:11px;outline:none}.bidbar input:focus{border-color:var(--acc)}
-  .hist{margin-top:14px;max-height:140px;overflow-y:auto;font-family:var(--mono);font-size:12px}.hist .h{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);color:var(--dim)}.hist .h:first-child{color:var(--acc)}
+  .hist{margin-top:14px;max-height:120px;overflow-y:auto;font-family:var(--mono);font-size:12px}.hist .h{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);color:var(--dim)}.hist .h:first-child{color:var(--acc)}
   .oppbox{background:linear-gradient(135deg,rgba(31,214,166,.12),rgba(54,163,255,.08));border:1px solid rgba(31,214,166,.3);border-radius:14px;padding:15px;margin-top:16px}.oppbox .big{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--acc)}
   .insp .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px}.insp .ok{color:var(--acc)}.insp .warn{color:var(--amber)}
   .vid{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.vid span{font-size:11px;font-family:var(--mono);color:var(--dim);background:var(--bg);border:1px solid var(--line);padding:5px 9px;border-radius:8px}
-  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--acc);color:var(--ink);padding:11px 18px;border-radius:12px;font-size:14px;z-index:70;opacity:0;transition:.3s;pointer-events:none}.toast.on{opacity:1}
-  .modal{position:fixed;inset:0;z-index:80;background:rgba(4,7,11,.8);display:none;place-items:center;padding:20px}.modal.on{display:grid}
-  .modal .m{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:360px;width:100%}
+  .ctray{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--acc);border-radius:14px;padding:10px 14px;display:none;gap:12px;align-items:center;z-index:45;box-shadow:0 10px 30px rgba(0,0,0,.5)}.ctray.on{display:flex}.ctray .cl{font-size:13px;font-family:var(--mono);color:var(--dim)}
+  .cmptbl{width:100%;border-collapse:collapse;font-size:13px}.cmptbl th,.cmptbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left}.cmptbl th{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--faint);font-weight:700}.cmptbl td{font-family:var(--mono)}.cmptbl .rl{color:var(--faint);font-family:var(--sans)}
+  .modal{position:fixed;inset:0;z-index:80;background:rgba(4,7,11,.8);display:none;place-items:center;padding:20px;overflow-y:auto}.modal.on{display:grid}
+  .modal .m{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:420px;width:100%}
+  .toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--acc);color:var(--ink);padding:11px 18px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:.3s;pointer-events:none}.toast.on{opacity:1}
   .foot{color:var(--faint);font-size:12px;font-family:var(--mono);text-align:center;padding:30px 0 26px;border-top:1px solid var(--line);margin-top:30px;line-height:1.7}
 </style>
-
+</head>
+<body>
 <div class="hd"><div class="vw">
   <div class="brand" data-go="home"><span class="tick">✓</span>Verified<span class="full" style="color:var(--acc)">Auto</span></div>
   <nav class="nav"><a data-go="home" class="on">Home</a><a data-go="browse">Browse</a><a data-go="sell">Sell</a><a data-go="dash">Account</a><a data-go="admin">Admin</a></nav>
   <div class="spacer"></div>
+  <button class="bell" id="bellBtn">🔔<span class="dot" id="bellDot">0</span></button>
   <span class="who" id="whoLbl"></span>
   <button class="btn btn-acc btn-sm" id="signBtn">Sign in</button>
 </div></div>
+<div class="notifpop" id="notifPop"><h5>Notifications</h5><div class="nlist" id="nList"></div></div>
 
 <section class="view on" id="view-home">
   <div class="hero"><div class="vw">
     <h1>Every car <span class="g">inspected, verified</span> and bid on in the open.</h1>
-    <p>Timed online auctions with full inspection reports — plus live margin signals for traders. Bids save and update live.</p>
+    <p>Timed online auctions with full inspection reports — plus live margin signals for traders.</p>
     <div class="row"><button class="btn btn-acc" data-go="browse">Browse live auctions</button><button class="btn btn-ghost" data-go="sell">List your vehicle</button></div>
   </div></div>
   <div class="vw">
@@ -105,23 +118,28 @@
 </section>
 
 <section class="view" id="view-browse"><div class="vw" style="padding-top:22px">
-  <h1 class="ph2">Browse auctions</h1><p class="sub" style="color:var(--faint);margin-bottom:14px">Filter the catalogue.</p>
+  <h1 class="ph2">Browse auctions</h1><p class="sub" style="color:var(--faint);margin-bottom:14px">Filter, compare, and save searches.</p>
   <div class="filters">
     <div class="f grow"><label>Search</label><input class="ctrl" id="fSearch" placeholder="make, model…"></div>
+    <div class="f"><label>Make</label><select class="ctrl" id="fMake"></select></div>
+    <div class="f"><label>Fuel</label><select class="ctrl" id="fFuel"><option value="">Any</option><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div>
+    <div class="f"><label>From year</label><select class="ctrl" id="fYear"><option value="0">Any</option><option>2015</option><option>2017</option><option>2019</option><option>2021</option></select></div>
     <div class="f"><label>Max price</label><select class="ctrl" id="fPrice"><option value="0">Any</option><option value="5000">£5,000</option><option value="10000">£10,000</option><option value="15000">£15,000</option><option value="20000">£20,000</option><option value="30000">£30,000</option></select></div>
-    <div class="f"><label>Sort</label><select class="ctrl" id="fSort"><option value="soon">Ending soon</option><option value="opp">Best margin</option><option value="low">Price: low→high</option><option value="high">Price: high→low</option></select></div>
+    <div class="f"><label>Sort</label><select class="ctrl" id="fSort"><option value="soon">Ending soon</option><option value="opp">Best margin</option><option value="low">Price ↑</option><option value="high">Price ↓</option></select></div>
+    <button class="btn btn-ghost btn-sm" id="saveSearch">⭐ Save search</button>
   </div>
   <div class="cards" id="browseCards"></div><div class="empty" id="browseEmpty" style="display:none">No cars match.</div>
 </div></section>
 
 <section class="view" id="view-sell"><div class="vw" style="padding:22px 0;max-width:640px">
-  <h1 class="ph2">List your car</h1><p class="sub" style="color:var(--faint);margin-bottom:16px">Submits to the verification queue → approve it in Admin to go live.</p>
+  <h1 class="ph2">List your car</h1><p class="sub" style="color:var(--faint);margin-bottom:16px">Submits for inspection → admin inspects & approves → goes live.</p>
   <div class="steps"><div class="step on" data-s="1">1 · Vehicle</div><div class="step" data-s="2">2 · Media</div><div class="step" data-s="3">3 · Reserve</div><div class="step" data-s="4">4 · Submit</div></div>
   <div class="box">
     <div class="sstep" data-step="1">
       <div class="fld"><label>Registration</label><input id="sReg" placeholder="AB12 CDE" style="text-transform:uppercase"></div>
       <div class="grid2"><div class="fld"><label>Make</label><input id="sMake"></div><div class="fld"><label>Model</label><input id="sModel"></div>
-      <div class="fld"><label>Year</label><input id="sYear"></div><div class="fld"><label>Mileage</label><input id="sMileage" placeholder="e.g. 48,000 mi · Diesel · Auto"></div></div>
+      <div class="fld"><label>Year</label><input id="sYear" type="number" placeholder="2019"></div><div class="fld"><label>Mileage</label><input id="sMileage" type="number" placeholder="48000"></div>
+      <div class="fld"><label>Fuel</label><select id="sFuel"><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div><div class="fld"><label>Gearbox</label><select id="sTrans"><option>Manual</option><option>Auto</option></select></div></div>
       <div class="fld"><label>Description / known faults</label><textarea id="sDesc" rows="2"></textarea></div>
     </div>
     <div class="sstep" data-step="2" style="display:none">
@@ -133,7 +151,7 @@
       <div class="fld"><label>Estimated market value (£) — for the margin signal</label><input id="sMkt" type="number" placeholder="11000"></div>
     </div>
     <div class="sstep" data-step="4" style="display:none">
-      <p style="font-size:14px;color:var(--dim);margin-bottom:12px">Submit for verification. Once approved in Admin it goes live as a timed auction.</p>
+      <p style="font-size:14px;color:var(--dim);margin-bottom:12px">Submit for verification. Admin inspects it, then it goes live as a timed auction.</p>
       <div class="fld"><label>Auction length</label><select id="sLen"><option value="1">1 day</option><option value="3" selected>3 days</option><option value="7">7 days</option></select></div>
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:16px"><button class="btn btn-ghost btn-sm" id="sBack" style="visibility:hidden">← Back</button><button class="btn btn-acc btn-sm" id="sNext">Continue →</button></div>
@@ -146,21 +164,40 @@
   <div class="stat" id="dashStats"></div>
   <div class="layout">
     <div class="box"><h4>⭐ Watchlist</h4><div id="watchList"></div></div>
-    <div class="box"><h4>🔨 My bids</h4><div id="myBids"></div></div>
+    <div><div class="box" style="margin-bottom:18px"><h4>🔨 My bids</h4><div id="myBids"></div></div>
+    <div class="box"><h4>🔔 Saved searches</h4><div id="savedList"></div></div></div>
   </div>
 </div></section>
 
 <section class="view" id="view-admin"><div class="vw" style="padding:22px 0">
-  <h1 class="ph2">Admin console</h1><p class="sub" style="color:var(--faint);margin-bottom:14px">Approve seller listings to make them live.</p>
+  <h1 class="ph2">Admin console</h1><p class="sub" style="color:var(--faint);margin-bottom:14px">Inspect & approve listings, schedule, track revenue.</p>
   <div class="stat" id="adStats"></div>
-  <div class="box"><h4>Listings awaiting approval</h4><div id="approvalList"></div></div>
+  <div class="box" style="margin-bottom:18px"><h4>Awaiting inspection & approval</h4><div id="approvalList"></div></div>
+  <div class="box"><h4>Fee revenue — last 6 months</h4><div class="bar" id="revBar"></div></div>
 </div></section>
 
-<div class="foot">Working prototype with shared, saved data. No real payments, identity checks or security — those need a server. Anything entered is visible to others who open this app.</div>
+<div class="foot">Working prototype with saved data. No real payments, identity checks or security — those need a server. Data is per device unless wired to a shared database.</div>
+
+<div class="ctray" id="ctray"><span class="cl" id="ctrayLbl"></span><button class="btn btn-acc btn-sm" id="ctrayGo">Compare</button><button class="btn btn-ghost btn-sm" id="ctrayClear">Clear</button></div>
 <div class="ov" id="ov"><div class="dt" id="dt"></div></div>
-<div class="modal" id="signModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Enter a display name</h4>
-  <input class="ctrl" id="nameIn" placeholder="e.g. mcr_motors" style="width:100%;margin-bottom:12px"><button class="btn btn-acc" id="nameSave" style="width:100%">Continue</button>
-  <p style="font-size:11px;color:var(--faint);margin:10px 0 0">Use a made-up name. It's visible to others on this app.</p></div></div>
+<div class="ov" id="cmpOv"><div class="dt" id="cmpDt" style="max-width:900px"></div></div>
+
+<div class="modal" id="signModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Enter a display name</h4><input class="ctrl" id="nameIn" placeholder="e.g. mcr_motors" style="width:100%;margin-bottom:12px"><button class="btn btn-acc" id="nameSave" style="width:100%">Continue</button><p style="font-size:11px;color:var(--faint);margin:10px 0 0">Use a made-up name. Visible to others on this app.</p></div></div>
+
+<div class="modal" id="inspModal"><div class="m" style="max-width:460px"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 14px">Inspection report</h4>
+  <div id="inspTitle" style="font-weight:700;margin-bottom:12px"></div>
+  <div class="grid2">
+    <div class="fld"><label>Exterior</label><select id="iExt"><option>Excellent</option><option selected>Good</option><option>Fair</option><option>Poor</option></select></div>
+    <div class="fld"><label>Interior</label><select id="iInt"><option>Excellent</option><option selected>Good</option><option>Fair</option><option>Poor</option></select></div>
+    <div class="fld"><label>Tyres</label><select id="iTyre"><option>Excellent</option><option selected>Good</option><option>Fair</option><option>Poor</option></select></div>
+    <div class="fld"><label>Brakes</label><select id="iBrk"><option>Excellent</option><option selected>Good</option><option>Fair</option><option>Poor</option></select></div>
+  </div>
+  <div class="fld"><label>OBD scan result</label><input id="iObd" placeholder="No fault codes"></div>
+  <div class="fld"><label>Body notes</label><input id="iBody" placeholder="e.g. minor kerbing O/S/F alloy"></div>
+  <div class="grid2"><div class="fld"><label>Inspector</label><input id="iInsp" placeholder="A. Shaw"></div><div class="fld"><label>Inspection date</label><input id="iDate" type="date"></div></div>
+  <div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-ghost btn-sm" id="iCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="iApprove" style="flex:1">Approve &amp; list</button></div>
+</div></div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -168,81 +205,102 @@
   const $=s=>document.querySelector(s),$$=s=>document.querySelectorAll(s);
   const gbp=n=>'£'+Math.round(n).toLocaleString('en-GB');
   const fmt=ms=>{if(ms<0)ms=0;const t=Math.floor(ms/1000),d=Math.floor(t/86400),h=Math.floor(t%86400/3600),m=Math.floor(t%3600/60),s=t%60;return d?d+'d '+h+'h':(h?h+':':'')+String(m).padStart(2,'0')+':'+String(s).padStart(2,'0');};
+  const ago=t=>{const s=Math.floor((Date.now()-t)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';};
   const carSVG=c=>`<svg viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${c}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3a52"/><stop offset="1" stop-color="#16202e"/></linearGradient></defs><path d="M18 64 Q22 44 44 42 L70 40 Q84 28 110 28 L140 30 Q162 32 172 48 L184 52 Q190 54 190 62 L190 66 Q190 70 184 70 L20 70 Q14 70 14 64 Z" fill="url(#g${c})" stroke="#3a4d68" stroke-width="1.5"/><circle cx="56" cy="70" r="11" fill="#0c1119" stroke="#46607f" stroke-width="2.5"/><circle cx="150" cy="70" r="11" fill="#0c1119" stroke="#46607f" stroke-width="2.5"/><path d="M78 40 L104 30 L130 31 L138 42 Z" fill="#1f2c3e" opacity=".7"/></svg>`;
 
-  // ---- storage layer (persists + shared; falls back to memory) ----
-  async function sget(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
-  async function sset(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){console.error('store',e);}}
+  // storage: cloud (Claude preview) with localStorage fallback (deployed)
+  const cloud=typeof window!=='undefined'&&window.storage;
+  async function sget(k,sh){if(cloud){try{const r=await window.storage.get(k,sh);return r?JSON.parse(r.value):null;}catch(e){return null;}}try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
+  async function sset(k,v,sh){if(cloud){try{await window.storage.set(k,JSON.stringify(v),sh);return;}catch(e){}}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
 
+  function mk(o){o.t=o.year+' '+o.make+' '+o.model;o.mi=o.mileage.toLocaleString()+' mi · '+o.fuel+' · '+o.trans;return o;}
   function seed(){const n=Date.now();return [
-    {id:'c1',make:'BMW',t:'2019 BMW 320d M Sport',mi:'48,200 mi · Diesel · Auto',bid:11200,mkt:14300,res:11000,ends:n+864e5*2,plate:'YE19 KFA',owners:2,mot:'Mar 2026',svc:'Full BMW',obd:'No fault codes',body:'Minor kerbing alloy',hist:[['trader_88',11200],['mcr_motors',10900]]},
-    {id:'c2',make:'Audi',t:'2018 Audi A4 Avant',mi:'61,400 mi · Petrol · Auto',bid:9650,mkt:12100,res:9500,ends:n+864e5*3,plate:'WR18 OPN',owners:3,mot:'Jan 2026',svc:'Partial',obd:'O2 sensor stored',body:'Light scratch tailgate',hist:[['forecourt_ldn',9650]]},
-    {id:'c3',make:'Ford',t:'2020 Ford Fiesta ST',mi:'29,800 mi · Petrol · Manual',bid:13100,mkt:15400,res:12500,ends:n+36e5*8,plate:'LD20 TTR',owners:1,mot:'May 2026',svc:'Full Ford',obd:'No fault codes',body:'Excellent',hist:[['hot_hatch_co',13100]]},
-    {id:'c4',make:'Mercedes',t:'2017 Mercedes C220d',mi:'72,600 mi · Diesel · Auto',bid:8200,mkt:11000,res:8500,ends:n+864e5,plate:'FN17 BWE',owners:3,mot:'Feb 2026',svc:'Partial',obd:'No fault codes',body:'Bumper scuff',hist:[['star_cars',8200]]},
-    {id:'c5',make:'Volkswagen',t:'2021 VW Golf GTI',mi:'24,100 mi · Petrol · DSG',bid:18900,mkt:21200,res:18000,ends:n+864e5*4,plate:'KM21 GTI',owners:1,mot:'Aug 2026',svc:'Full VW',obd:'No fault codes',body:'Excellent',hist:[['gti_world',18900]]},
-    {id:'c6',make:'Vauxhall',t:'2016 Vauxhall Corsa',mi:'58,900 mi · Petrol · Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',obd:'EML on',body:'Panel scuffs',hist:[['budget_cars',3650]]}
+    mk({id:'c1',make:'BMW',model:'320d M Sport',year:2019,mileage:48200,fuel:'Diesel',trans:'Auto',bid:11200,mkt:14300,res:11000,ends:n+864e5*2,plate:'YE19 KFA',owners:2,mot:'Mar 2026',svc:'Full BMW',insp:{ext:'Good',int:'Good',tyre:'Good',brk:'Good',obd:'No fault codes',body:'Minor kerbing alloy',by:'A. Shaw'},hist:[['trader_88',11200],['mcr_motors',10900]]}),
+    mk({id:'c2',make:'Audi',model:'A4 Avant',year:2018,mileage:61400,fuel:'Petrol',trans:'Auto',bid:9650,mkt:12100,res:9500,ends:n+864e5*3,plate:'WR18 OPN',owners:3,mot:'Jan 2026',svc:'Partial',insp:{ext:'Good',int:'Fair',tyre:'Good',brk:'Good',obd:'O2 sensor stored',body:'Light scratch tailgate',by:'R. Mills'},hist:[['forecourt_ldn',9650]]}),
+    mk({id:'c3',make:'Ford',model:'Fiesta ST',year:2020,mileage:29800,fuel:'Petrol',trans:'Manual',bid:13100,mkt:15400,res:12500,ends:n+36e5*8,plate:'LD20 TTR',owners:1,mot:'May 2026',svc:'Full Ford',insp:{ext:'Excellent',int:'Excellent',tyre:'Good',brk:'Good',obd:'No fault codes',body:'Excellent',by:'A. Shaw'},hist:[['hot_hatch_co',13100]]}),
+    mk({id:'c4',make:'Mercedes',model:'C220d',year:2017,mileage:72600,fuel:'Diesel',trans:'Auto',bid:8200,mkt:11000,res:8500,ends:n+864e5,plate:'FN17 BWE',owners:3,mot:'Feb 2026',svc:'Partial',insp:{ext:'Good',int:'Good',tyre:'Fair',brk:'Good',obd:'No fault codes',body:'Bumper scuff N/S/R',by:'R. Mills'},hist:[['star_cars',8200]]}),
+    mk({id:'c5',make:'Volkswagen',model:'Golf GTI',year:2021,mileage:24100,fuel:'Petrol',trans:'Auto',bid:18900,mkt:21200,res:18000,ends:n+864e5*4,plate:'KM21 GTI',owners:1,mot:'Aug 2026',svc:'Full VW',insp:{ext:'Excellent',int:'Excellent',tyre:'Excellent',brk:'Good',obd:'No fault codes',body:'Excellent',by:'A. Shaw'},hist:[['gti_world',18900]]}),
+    mk({id:'c6',make:'Vauxhall',model:'Corsa',year:2016,mileage:58900,fuel:'Petrol',trans:'Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',insp:{ext:'Fair',int:'Fair',tyre:'Fair',brk:'Fair',obd:'EML on — needs diag',body:'Panel scuffs',by:'R. Mills'},hist:[['budget_cars',3650]]})
   ];}
 
-  let cars=[],pending=[],user=null;
-  async function loadAll(){
-    cars=await sget('vaa_auctions',true);
-    if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}
-    pending=await sget('vaa_pending',true)||[];
-    user=await sget('vaa_user',false)||null;
-  }
-  const saveCars=()=>sset('vaa_auctions',cars,true);
-  const savePending=()=>sset('vaa_pending',pending,true);
-  const saveUser=()=>sset('vaa_user',user,false);
+  let cars=[],pending=[],user=null,compare=[],tops={};
+  async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];user=await sget('vaa_user',false)||null;cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
+  const saveCars=()=>sset('vaa_auctions',cars,true);const savePending=()=>sset('vaa_pending',pending,true);const saveUser=()=>sset('vaa_user',user,false);
 
   const reserveMet=c=>typeof c.res==='number'?c.bid>=c.res:true;
-  const cardHTML=c=>{const opp=c.mkt-c.bid,w=user&&user.watch&&user.watch.includes(c.id);return `<div class="card">
+  function addNotif(text){if(!user)return;user.notifs=user.notifs||[];user.notifs.unshift({text,time:Date.now(),read:false});user.notifs=user.notifs.slice(0,30);saveUser();renderBell();}
+  function renderBell(){const u=user&&user.notifs?user.notifs.filter(n=>!n.read).length:0;const d=$('#bellDot');d.textContent=u;d.classList.toggle('on',u>0);}
+
+  const cardHTML=c=>{const opp=c.mkt-c.bid,w=user&&user.watch&&user.watch.includes(c.id),inC=compare.includes(c.id);return `<div class="card">
     <div class="ph" data-open="${c.id}" style="background:linear-gradient(135deg,#16202e,#0e1620)"><span class="ver pill p-ver">✓ VERIFIED</span>
-      <button class="star ${w?'on':''}" data-star="${c.id}">${w?'★':'☆'}</button>${carSVG(c.id)}<span class="cnt" data-cnt="${c.id}">--</span></div>
+      <div class="acts"><button class="ico cmp ${inC?'on':''}" data-cmp="${c.id}" title="Compare">⇄</button><button class="ico ${w?'on':''}" data-star="${c.id}" title="Watch">${w?'★':'☆'}</button></div>${carSVG(c.id)}<span class="cnt" data-cnt="${c.id}">--</span></div>
     <div class="cb" data-open="${c.id}"><h3>${c.t}</h3><div class="meta">${c.mi} · ${c.owners} own</div>
       <div class="bidrow"><div><div class="bl">Current bid</div><div class="bv">${gbp(c.bid)}</div></div>${opp>0?`<div class="opp">+${gbp(opp)}</div>`:''}</div>
       <div class="res ${reserveMet(c)?'met':'no'}">${reserveMet(c)?'✓ Reserve met':'Reserve not met'}</div></div></div>`;};
 
-  function renderHome(){
-    $('#oppCards').innerHTML=[...cars].sort((a,b)=>(b.mkt-b.bid)-(a.mkt-a.bid)).slice(0,3).map(cardHTML).join('')||'<div class="empty">No cars yet.</div>';
-    $('#soonCards').innerHTML=[...cars].sort((a,b)=>a.ends-b.ends).slice(0,3).map(cardHTML).join('')||'<div class="empty">No cars yet.</div>';
-  }
-  function renderBrowse(){
-    const q=($('#fSearch').value||'').toLowerCase(),mp=+$('#fPrice').value,sort=$('#fSort').value;
-    let l=cars.filter(c=>(!q||c.t.toLowerCase().includes(q))&&(!mp||c.bid<=mp));
-    l.sort((a,b)=>sort==='soon'?a.ends-b.ends:sort==='opp'?(b.mkt-b.bid)-(a.mkt-a.bid):sort==='low'?a.bid-b.bid:b.bid-a.bid);
-    $('#browseCards').innerHTML=l.map(cardHTML).join('');$('#browseEmpty').style.display=l.length?'none':'block';
-  }
+  function renderHome(){$('#oppCards').innerHTML=[...cars].sort((a,b)=>(b.mkt-b.bid)-(a.mkt-a.bid)).slice(0,3).map(cardHTML).join('')||'<div class="empty">No cars yet.</div>';$('#soonCards').innerHTML=[...cars].sort((a,b)=>a.ends-b.ends).slice(0,3).map(cardHTML).join('')||'<div class="empty">No cars yet.</div>';}
+  function matches(f){return cars.filter(c=>(!f.q||c.t.toLowerCase().includes(f.q))&&(!f.make||c.make===f.make)&&(!f.fuel||c.fuel===f.fuel)&&(!f.year||c.year>=f.year)&&(!f.price||c.bid<=f.price));}
+  function curFilters(){return{q:($('#fSearch').value||'').toLowerCase(),make:$('#fMake').value,fuel:$('#fFuel').value,year:+$('#fYear').value,price:+$('#fPrice').value};}
+  function renderBrowse(){const f=curFilters(),sort=$('#fSort').value;let l=matches(f);l.sort((a,b)=>sort==='soon'?a.ends-b.ends:sort==='opp'?(b.mkt-b.bid)-(a.mkt-a.bid):sort==='low'?a.bid-b.bid:b.bid-a.bid);$('#browseCards').innerHTML=l.map(cardHTML).join('');$('#browseEmpty').style.display=l.length?'none':'block';}
   function renderDash(){
-    $('#kycBanner').innerHTML=user?`🪪 <span>Signed in as <b style="color:var(--ink)">${user.name}</b> · KYC verified (demo) · deposit £500 on file.</span>`:'🪪 <span>Not signed in — tap "Sign in" to bid or sell.</span>';
-    const watched=user&&user.watch?cars.filter(c=>user.watch.includes(c.id)):[];
-    const mine=user?cars.filter(c=>c.hist&&c.hist.some(h=>h[0]===user.name)):[];
-    $('#dashStats').innerHTML=`<div class="s"><div class="n">${watched.length}</div><div class="l">Watchlist</div></div><div class="s"><div class="n" style="color:var(--acc)">${mine.length}</div><div class="l">Bids placed</div></div><div class="s"><div class="n">£500</div><div class="l">Deposit</div></div><div class="s"><div class="n" style="color:var(--acc2)">${user?'✓':'—'}</div><div class="l">KYC</div></div>`;
-    $('#watchList').innerHTML=watched.length?watched.map(c=>`<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer" data-open="${c.id}"><span>${c.t}</span><span style="font-family:var(--mono);color:var(--acc)">${gbp(c.bid)}</span></div>`).join(''):'<div class="empty">Star cars to watch them.</div>';
-    $('#myBids').innerHTML=mine.length?mine.map(c=>{const win=c.hist[0][0]===user.name;return `<div style="display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer" data-open="${c.id}"><span>${c.t}</span><span style="font-family:var(--mono);color:${win?'var(--acc)':'var(--amber)'}">${win?'Winning':'Outbid'} · ${gbp(c.bid)}</span></div>`;}).join(''):'<div class="empty">No bids yet.</div>';
+    $('#kycBanner').innerHTML=user?`🪪 <span>Signed in as <b style="color:var(--ink)">${user.name}</b> · KYC verified (demo) · deposit £500.</span>`:'🪪 <span>Not signed in — tap "Sign in" to bid or sell.</span>';
+    const watched=user&&user.watch?cars.filter(c=>user.watch.includes(c.id)):[];const mine=user?cars.filter(c=>c.hist&&c.hist.some(h=>h[0]===user.name)):[];const ss=user&&user.searches?user.searches:[];
+    $('#dashStats').innerHTML=`<div class="s"><div class="n">${watched.length}</div><div class="l">Watchlist</div></div><div class="s"><div class="n" style="color:var(--acc)">${mine.length}</div><div class="l">Bids placed</div></div><div class="s"><div class="n">${ss.length}</div><div class="l">Saved searches</div></div><div class="s"><div class="n" style="color:var(--acc2)">${user?'✓':'—'}</div><div class="l">KYC</div></div>`;
+    $('#watchList').innerHTML=watched.length?watched.map(c=>`<div class="ssrow" data-open="${c.id}"><span>${c.t}</span><span style="font-family:var(--mono);color:var(--acc)">${gbp(c.bid)}</span></div>`).join(''):'<div class="empty">Star cars to watch them.</div>';
+    $('#myBids').innerHTML=mine.length?mine.map(c=>{const win=c.hist[0][0]===user.name;return `<div class="ssrow" data-open="${c.id}"><span>${c.t}</span><span style="font-family:var(--mono);color:${win?'var(--acc)':'var(--amber)'}">${win?'Winning':'Outbid'} · ${gbp(c.bid)}</span></div>`;}).join(''):'<div class="empty">No bids yet.</div>';
+    $('#savedList').innerHTML=ss.length?ss.map((s,i)=>`<div class="ssrow" data-search="${i}"><span>${s.name}</span><span class="pill p-opp">${matches(s.f).length} match</span></div>`).join(''):'<div class="empty">Save a search from Browse.</div>';
   }
   function renderAdmin(){
-    $('#adStats').innerHTML=`<div class="s"><div class="n" style="color:var(--acc)">${cars.length}</div><div class="l">Live auctions</div></div><div class="s"><div class="n" style="color:var(--amber)">${pending.length}</div><div class="l">Pending</div></div><div class="s"><div class="n">${cars.reduce((s,c)=>s+(c.hist?c.hist.length:0),0)}</div><div class="l">Total bids</div></div><div class="s"><div class="n" style="color:var(--acc2)">${gbp(cars.reduce((s,c)=>s+c.bid*0.08,0))}</div><div class="l">Est. fees</div></div>`;
-    $('#approvalList').innerHTML=pending.length?pending.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)"><div><div style="font-size:14px;font-weight:600">${p.t}</div><div style="font-size:12px;color:var(--faint);font-family:var(--mono)">${p.mi} · reserve ${gbp(p.res)} · ${p.plate||'no reg'}</div></div><div style="display:flex;gap:8px;align-items:center"><span class="pill p-pend">PENDING</span><button class="btn btn-acc btn-sm" data-approve="${i}">Approve &amp; list</button></div></div>`).join(''):'<div class="empty">Nothing pending. Submit a car in the Sell tab.</div>';
+    $('#adStats').innerHTML=`<div class="s"><div class="n" style="color:var(--acc)">${cars.length}</div><div class="l">Live</div></div><div class="s"><div class="n" style="color:var(--amber)">${pending.length}</div><div class="l">Pending</div></div><div class="s"><div class="n">${cars.reduce((s,c)=>s+(c.hist?c.hist.length:0),0)}</div><div class="l">Total bids</div></div><div class="s"><div class="n" style="color:var(--acc2)">${gbp(cars.reduce((s,c)=>s+c.bid*0.08,0))}</div><div class="l">Est. fees</div></div>`;
+    $('#approvalList').innerHTML=pending.length?pending.map((p,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)"><div><div style="font-size:14px;font-weight:600">${p.t}</div><div style="font-size:12px;color:var(--faint);font-family:var(--mono)">${p.mi} · reserve ${gbp(p.res)} · ${p.plate||'no reg'}</div></div><div style="display:flex;gap:8px;align-items:center"><span class="pill p-pend">PENDING</span><button class="btn btn-acc btn-sm" data-inspect="${i}">Inspect &amp; approve</button></div></div>`).join(''):'<div class="empty">Nothing pending. Submit a car in Sell.</div>';
+    const rev=[9200,11800,10400,14600,15900,Math.round(cars.reduce((s,c)=>s+c.bid*0.08,0))||12000];const mx=Math.max(...rev);const mo=['Jan','Feb','Mar','Apr','May','Now'];
+    $('#revBar').innerHTML=rev.map((v,i)=>`<div class="b" style="height:${Math.max(6,v/mx*100)}%"><span>£${(v/1000).toFixed(1)}k</span><em>${mo[i]}</em></div>`).join('');
   }
-  function renderCurrent(){const v=$('.view.on').id.replace('view-','');renderHome();if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();}
+  function renderCurrent(){const v=$('.view.on').id.replace('view-','');renderHome();if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();updateCtray();}
 
-  // routing
   function go(v){$$('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));$$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();}
 
   // sign in
   function needName(){if(!user){$('#nameIn').value='';$('#signModal').classList.add('on');return false;}return true;}
   $('#signBtn').onclick=()=>{$('#nameIn').value=user?user.name:'';$('#signModal').classList.add('on');};
-  $('#nameSave').onclick=async()=>{const n=$('#nameIn').value.trim();if(!n){toast('Enter a name');return;}user={name:n,watch:(user&&user.watch)||[]};await saveUser();$('#signModal').classList.remove('on');updateWho();renderCurrent();toast('Signed in as '+n);};
+  $('#nameSave').onclick=async()=>{const n=$('#nameIn').value.trim();if(!n){toast('Enter a name');return;}user={name:n,watch:(user&&user.watch)||[],searches:(user&&user.searches)||[],notifs:(user&&user.notifs)||[]};await saveUser();$('#signModal').classList.remove('on');updateWho();renderBell();renderCurrent();toast('Signed in as '+n);};
   function updateWho(){$('#whoLbl').textContent=user?'👤 '+user.name:'';$('#signBtn').textContent=user?'Switch':'Sign in';}
+
+  // notifications popover
+  $('#bellBtn').onclick=()=>{const p=$('#notifPop');const open=!p.classList.contains('on');p.classList.toggle('on',open);if(open){$('#nList').innerHTML=(user&&user.notifs&&user.notifs.length)?user.notifs.map(n=>`<div class="ni">${n.text}<div class="tm">${ago(n.time)}</div></div>`).join(''):'<div class="empty">No notifications yet.</div>';if(user&&user.notifs){user.notifs.forEach(n=>n.read=true);saveUser();renderBell();}}};
+  document.addEventListener('click',e=>{if(!e.target.closest('#notifPop')&&!e.target.closest('#bellBtn'))$('#notifPop').classList.remove('on');});
+
+  // compare
+  function updateCtray(){const t=$('#ctray');t.classList.toggle('on',compare.length>0);$('#ctrayLbl').textContent=compare.length+' selected to compare';}
+  function openCompare(){const list=compare.map(id=>cars.find(c=>c.id===id)).filter(Boolean);if(list.length<2){toast('Pick at least 2 cars');return;}
+    const rows=[['Year','year'],['Mileage','mileage'],['Fuel','fuel'],['Gearbox','trans'],['Owners','owners'],['Current bid','bid'],['Est. market','mkt'],['Margin','margin'],['Reserve','reserve'],['Service','svc'],['MOT','mot']];
+    $('#cmpDt').innerHTML=`<button class="x" id="cmpX">✕</button><div class="dt-body"><h2 style="margin-bottom:16px">Compare vehicles</h2><div style="overflow-x:auto"><table class="cmptbl"><thead><tr><th></th>${list.map(c=>`<th>${c.t}</th>`).join('')}</tr></thead><tbody>${rows.map(([lbl,key])=>`<tr><td class="rl">${lbl}</td>${list.map(c=>{let v;if(key==='margin'){const m=c.mkt-c.bid;v=`<span style="color:${m>0?'var(--acc)':'var(--red)'}">${(m>=0?'+':'')+gbp(m)}</span>`;}else if(key==='reserve')v=reserveMet(c)?'<span style="color:var(--acc)">Met</span>':'<span style="color:var(--amber)">Not met</span>';else if(key==='mileage')v=c.mileage.toLocaleString()+' mi';else if(key==='bid'||key==='mkt')v=gbp(c[key]);else v=c[key];return `<td>${v}</td>`;}).join('')}</tr>`).join('')}</tbody></table></div></div>`;
+    $('#cmpOv').classList.add('on');document.body.style.overflow='hidden';$('#cmpX').onclick=()=>{$('#cmpOv').classList.remove('on');document.body.style.overflow='';};
+  }
+  $('#cmpOv').onclick=e=>{if(e.target===$('#cmpOv')){$('#cmpOv').classList.remove('on');document.body.style.overflow='';}};
+  $('#ctrayGo').onclick=openCompare;$('#ctrayClear').onclick=()=>{compare=[];renderCurrent();};
+
+  // saved search
+  $('#saveSearch').onclick=async()=>{if(!needName())return;const f=curFilters();const parts=[f.make,f.fuel,f.year?f.year+'+':'',f.price?'≤£'+(f.price/1000)+'k':'',f.q].filter(Boolean);user.searches=user.searches||[];user.searches.unshift({name:parts.join(' · ')||'All cars',f});user.searches=user.searches.slice(0,12);await saveUser();toast('Search saved ✓');};
 
   // global clicks
   document.addEventListener('click',async e=>{
     const g=e.target.closest('[data-go]');if(g){go(g.dataset.go);return;}
     const st=e.target.closest('[data-star]');if(st){if(!needName())return;const id=st.dataset.star;user.watch=user.watch||[];const i=user.watch.indexOf(id);i>=0?user.watch.splice(i,1):user.watch.push(id);await saveUser();st.classList.toggle('on',i<0);st.textContent=i<0?'★':'☆';return;}
+    const cm=e.target.closest('[data-cmp]');if(cm){const id=cm.dataset.cmp;const i=compare.indexOf(id);if(i>=0)compare.splice(i,1);else{if(compare.length>=3){toast('Compare up to 3');return;}compare.push(id);}cm.classList.toggle('on',i<0);updateCtray();return;}
     const op=e.target.closest('[data-open]');if(op){openCar(op.dataset.open);return;}
-    const ap=e.target.closest('[data-approve]');if(ap){const p=pending.splice(+ap.dataset.approve,1)[0];cars.push({id:'u'+Date.now(),make:p.make,t:p.t,mi:p.mi,bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,ends:Date.now()+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',obd:'No fault codes',body:p.desc||'See report',hist:[['opening_bid',Math.round(p.res*0.8)]]});await savePending();await saveCars();toast('Listed live ✓');renderAdmin();renderHome();return;}
+    const se=e.target.closest('[data-search]');if(se){const s=user.searches[+se.dataset.search];$('#fSearch').value=s.f.q||'';$('#fMake').value=s.f.make||'';$('#fFuel').value=s.f.fuel||'';$('#fYear').value=s.f.year||0;$('#fPrice').value=s.f.price||0;go('browse');return;}
+    const ins=e.target.closest('[data-inspect]');if(ins){openInspect(+ins.dataset.inspect);return;}
   });
-  ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{if(['fSearch','fPrice','fSort'].includes(e.target.id))renderBrowse();}));
+  ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{if(['fSearch','fMake','fFuel','fYear','fPrice','fSort'].includes(e.target.id))renderBrowse();}));
+
+  // inspect & approve
+  let inspIdx=null;
+  function openInspect(i){inspIdx=i;const p=pending[i];$('#inspTitle').textContent=p.t;$('#iObd').value='No fault codes';$('#iBody').value=p.desc||'';$('#iInsp').value='';$('#iDate').value='';$('#inspModal').classList.add('on');}
+  $('#iCancel').onclick=()=>$('#inspModal').classList.remove('on');
+  $('#iApprove').onclick=async()=>{const p=pending.splice(inspIdx,1)[0];const insp={ext:$('#iExt').value,int:$('#iInt').value,tyre:$('#iTyre').value,brk:$('#iBrk').value,obd:$('#iObd').value||'No fault codes',body:$('#iBody').value||'See report',by:$('#iInsp').value||'Inspector'};
+    const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,ends:Date.now()+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,hist:[['opening_bid',Math.round(p.res*0.8)]]});
+    cars.push(car);tops[car.id]='opening_bid';await savePending();await saveCars();$('#inspModal').classList.remove('on');toast('Inspected & listed live ✓');if(p.by===(user&&user.name)){/* lister notify handled below */}addNotif('Your listing "'+p.t+'" passed inspection and is now live.');renderAdmin();renderHome();};
 
   // seller flow
   let step=1;
@@ -250,23 +308,23 @@
   $('#sNext').onclick=async()=>{
     if(step===1&&!$('#sMake').value){toast('Add at least the make');return;}
     if(step===4){if(!needName())return;
-      pending.push({make:$('#sMake').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:($('#sMileage').value||'see report'),res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,by:user.name});
-      await savePending();toast('Submitted to verification queue ✓');
+      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,by:user.name});
+      await savePending();addNotif('Your car was submitted for inspection.');toast('Submitted to verification queue ✓');
       step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt'].forEach(i=>$('#'+i).value='');go('admin');return;}
     step++;showStep();};
   $('#sBack').onclick=()=>{if(step>1)step--;showStep();};
 
   // auction modal
-  let activeId=null,tick=null;
-  const getActive=()=>cars.find(c=>c.id===activeId);
-  function openCar(id){activeId=id;const c=getActive();if(!c)return;
-    const insp=[['Exterior',(c.body||'').toLowerCase().includes('excellent')?'ok':'warn',c.body||'See report'],['OBD scan',(c.obd||'').includes('No')?'ok':'warn',c.obd||'—'],['MOT','ok',c.mot||'—'],['Service',c.svc==='None'?'warn':'ok',c.svc||'—'],['Tyres / brakes','ok','Pass']];
+  let activeId=null,tick=null;const getActive=()=>cars.find(c=>c.id===activeId);
+  function openCar(id){activeId=id;const c=getActive();if(!c)return;const ip=c.insp||{};
+    const insp=[['Exterior',(ip.ext||'Good')==='Poor'?'warn':'ok',ip.ext||'Good'],['Interior',(ip.int||'Good')==='Poor'?'warn':'ok',ip.int||'Good'],['Tyres',(ip.tyre||'Good')==='Poor'||(ip.tyre||'')==='Fair'?'warn':'ok',ip.tyre||'Good'],['Brakes',(ip.brk||'Good')==='Poor'?'warn':'ok',ip.brk||'Good'],['OBD scan',(ip.obd||'').includes('No')?'ok':'warn',ip.obd||'No fault codes'],['Body','ok',ip.body||'See report']];
     $('#dt').innerHTML=`<button class="x" id="closeX">✕</button>
       <div class="dt-hero" style="background:radial-gradient(circle at 30% 20%,#1b2a3e,#0c1119)">${carSVG(c.id)}<span class="ver pill p-ver" style="position:absolute;top:14px;left:14px">✓ VERIFIED</span></div>
       <div class="dt-body"><h2>${c.t}</h2><div class="meta">${c.mi} · ${c.owners} owners · ${c.plate||''}</div>
       <div class="dgrid"><div>
-        <div class="box flat"><h4>Vehicle</h4><div class="spec"><div class="k">Mileage</div><div class="v">${(c.mi||'').split(' · ')[0]}</div><div class="k">Owners</div><div class="v">${c.owners}</div><div class="k">MOT</div><div class="v">${c.mot||'—'}</div><div class="k">Service</div><div class="v">${c.svc||'—'}</div></div></div>
-        <div class="box flat insp" style="margin-top:14px"><h4>Inspection report</h4>${insp.map(([k,s,v])=>`<div class="row"><span>${k}</span><span class="${s}">${s==='ok'?'✓ ':'⚠ '}${v}</span></div>`).join('')}<div class="vid"><span>▶ Cold-start</span><span>▶ Driving</span><span>▶ Walkaround</span><span>🖼 52 photos</span></div></div>
+        <div class="box flat"><h4>Vehicle</h4><div class="spec"><div class="k">Mileage</div><div class="v">${c.mileage.toLocaleString()} mi</div><div class="k">Owners</div><div class="v">${c.owners}</div><div class="k">MOT</div><div class="v">${c.mot||'—'}</div><div class="k">Service</div><div class="v">${c.svc||'—'}</div></div></div>
+        <div class="box flat insp" style="margin-top:14px"><h4>Inspection report${ip.by?' · '+ip.by:''}</h4>${insp.map(([k,s,v])=>`<div class="row"><span>${k}</span><span class="${s}">${s==='ok'?'✓ ':'⚠ '}${v}</span></div>`).join('')}<div class="vid"><span>▶ Cold-start</span><span>▶ Driving</span><span>▶ Walkaround</span></div></div>
+        <div class="box flat" style="margin-top:14px"><h4>Photos (52)</h4><div class="gallery">${Array.from({length:8}).map(()=>`<div class="g">${carSVG('p'+Math.random())}</div>`).join('')}</div></div>
       </div><div>
         <div class="box flat"><div class="timer-l">Auction ends in</div><div class="timer" id="bigTimer">--</div>
           <div class="cur"><div class="timer-l">Current bid</div><div class="bv" id="curBid">${gbp(c.bid)}</div><div class="rs" id="resStat"></div></div>
@@ -274,37 +332,25 @@
           <div class="hist" id="hist"></div></div>
         <div class="oppbox"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Margin opportunity</h4><div class="big" id="oppBig"></div><div style="font-size:12px;color:var(--dim);font-family:var(--mono)" id="oppSub"></div></div>
       </div></div></div>`;
-    $('#ov').classList.add('on');document.body.style.overflow='hidden';
-    $('#closeX').onclick=closeCar;refreshModal();
+    $('#ov').classList.add('on');document.body.style.overflow='hidden';$('#closeX').onclick=closeCar;refreshModal();
     $('#bidBtn').onclick=placeBid;$('#bidIn').onkeydown=e=>{if(e.key==='Enter')placeBid();};
     if(tick)clearInterval(tick);tick=setInterval(()=>{const t=$('#bigTimer');const c=getActive();if(!t||!c)return;const ms=c.ends-Date.now();t.textContent=ms<=0?'ENDED':fmt(ms);t.classList.toggle('urgent',ms<12e4&&ms>0);},1000);
   }
-  function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;
-    $('#curBid').textContent=gbp(c.bid);
-    $('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';
-    const o=c.mkt-c.bid;$('#oppBig').textContent=(o>=0?'+':'')+gbp(o);$('#oppBig').style.color=o>0?'var(--acc)':'var(--red)';$('#oppSub').textContent='Est. market '+gbp(c.mkt)+' vs bid '+gbp(c.bid);
-    $('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');
-  }
-  async function placeBid(){if(!needName())return;const c=getActive();if(!c)return;
-    if(Date.now()>c.ends){toast('This auction has ended');return;}
-    const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
-    cars=await sget('vaa_auctions',true)||cars;const cc=getActive();if(v<=cc.bid){toast('Someone just bid '+gbp(cc.bid));refreshModal();return;}
-    let ext=false;if(cc.ends-Date.now()<12e4){cc.ends+=12e4;ext=true;}
-    cc.bid=v;cc.hist=cc.hist||[];cc.hist.unshift([user.name,v]);await saveCars();$('#bidIn').value='';refreshModal();renderHome();
-    toast(ext?'Bid placed — timer +2 min (anti-snipe)':'You are the highest bidder ✓');
-  }
+  function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const o=c.mkt-c.bid;$('#oppBig').textContent=(o>=0?'+':'')+gbp(o);$('#oppBig').style.color=o>0?'var(--acc)':'var(--red)';$('#oppSub').textContent='Est. market '+gbp(c.mkt)+' vs bid '+gbp(c.bid);$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
+  async function placeBid(){if(!needName())return;const c=getActive();if(!c)return;if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
+    const fresh=await sget('vaa_auctions',true);if(fresh)cars=fresh;const cc=getActive();if(v<=cc.bid){toast('Someone just bid '+gbp(cc.bid));refreshModal();return;}
+    let ext=false;if(cc.ends-Date.now()<12e4){cc.ends+=12e4;ext=true;}cc.bid=v;cc.hist=cc.hist||[];cc.hist.unshift([user.name,v]);tops[cc.id]=user.name;await saveCars();$('#bidIn').value='';refreshModal();renderHome();addNotif('You bid '+gbp(v)+' on '+cc.t+'.');toast(ext?'Bid placed — timer +2 min (anti-snipe)':'You are the highest bidder ✓');}
   function closeCar(){$('#ov').classList.remove('on');document.body.style.overflow='';activeId=null;if(tick)clearInterval(tick);renderCurrent();}
   $('#ov').onclick=e=>{if(e.target===$('#ov'))closeCar();};
 
-  // card countdowns + live sync poll
+  // countdowns + sync poll (detect outbid)
   setInterval(()=>{$$('[data-cnt]').forEach(el=>{const c=cars.find(x=>x.id==el.dataset.cnt);if(c)el.textContent='⏱ '+fmt(c.ends-Date.now());});},1000);
-  setInterval(async()=>{const fresh=await sget('vaa_auctions',true);if(fresh){cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}},5000);
+  setInterval(async()=>{const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}},5000);
 
   let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
 
-  (async function init(){await loadAll();updateWho();renderHome();showStep();})();
+  (async function init(){await loadAll();$('#fMake').innerHTML='<option value="">Any make</option>'+[...new Set(cars.map(c=>c.make))].sort().map(m=>`<option>${m}</option>`).join('');updateWho();renderBell();renderHome();showStep();})();
 })();
 </script>
-</div>
 </body>
 </html>
