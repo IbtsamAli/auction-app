@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Verified Auto Auctions</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
   :root{--bg:#0a0e14;--panel:#111722;--panel2:#19212e;--line:#26303f;--ink:#eaf0f7;--dim:#93a1b5;--faint:#5c6b80;--acc:#1fd6a6;--acc2:#36a3ff;--gold:#f6c560;--red:#ff5f6d;--amber:#ffac3b;--mono:'JetBrains Mono',monospace;--sans:'Sora',system-ui,sans-serif}
@@ -208,10 +209,22 @@
   const ago=t=>{const s=Math.floor((Date.now()-t)/1000);if(s<60)return'just now';if(s<3600)return Math.floor(s/60)+'m ago';if(s<86400)return Math.floor(s/3600)+'h ago';return Math.floor(s/86400)+'d ago';};
   const carSVG=c=>`<svg viewBox="0 0 200 90" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="g${c}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2a3a52"/><stop offset="1" stop-color="#16202e"/></linearGradient></defs><path d="M18 64 Q22 44 44 42 L70 40 Q84 28 110 28 L140 30 Q162 32 172 48 L184 52 Q190 54 190 62 L190 66 Q190 70 184 70 L20 70 Q14 70 14 64 Z" fill="url(#g${c})" stroke="#3a4d68" stroke-width="1.5"/><circle cx="56" cy="70" r="11" fill="#0c1119" stroke="#46607f" stroke-width="2.5"/><circle cx="150" cy="70" r="11" fill="#0c1119" stroke="#46607f" stroke-width="2.5"/><path d="M78 40 L104 30 L130 31 L138 42 Z" fill="#1f2c3e" opacity=".7"/></svg>`;
 
-  // storage: cloud (Claude preview) with localStorage fallback (deployed)
-  const cloud=typeof window!=='undefined'&&window.storage;
-  async function sget(k,sh){if(cloud){try{const r=await window.storage.get(k,sh);return r?JSON.parse(r.value):null;}catch(e){return null;}}try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
-  async function sset(k,v,sh){if(cloud){try{await window.storage.set(k,JSON.stringify(v),sh);return;}catch(e){}}try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  // ===== BACKEND CONNECTION (Supabase) =====
+  // Paste your two values between the quotes below, then deploy.
+  const SUPABASE_URL = "https://nieybhvdaxrqfmzflgvb.supabase.co";   // <-- your Project URL (check it matches yours)
+  const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_PUBLIC_KEY_HERE";        // <-- paste your anon / public key here
+  let sb=null;
+  try{ if(window.supabase && SUPABASE_URL.indexOf('http')===0 && SUPABASE_ANON_KEY.indexOf('PASTE')!==0){ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } }catch(e){ console.error('supabase init',e); }
+  function lget(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
+  function lset(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}
+  async function sget(k,sh){
+    if(sb){try{const {data,error}=await sb.from('app_state').select('value').eq('key',k).maybeSingle();if(error)throw error;return data?data.value:null;}catch(e){console.error('sget',e);return lget(k);}}
+    return lget(k);
+  }
+  async function sset(k,v,sh){
+    if(sb){try{const {error}=await sb.from('app_state').upsert({key:k,value:v,updated_at:new Date().toISOString()},{onConflict:'key'});if(error)throw error;return;}catch(e){console.error('sset',e);}}
+    lset(k,v);
+  }
 
   function mk(o){o.t=o.year+' '+o.make+' '+o.model;o.mi=o.mileage.toLocaleString()+' mi · '+o.fuel+' · '+o.trans;return o;}
   function seed(){const n=Date.now();return [
