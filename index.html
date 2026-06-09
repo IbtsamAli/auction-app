@@ -93,6 +93,12 @@
   .modal .m{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;max-width:420px;width:100%}
   .toast{position:fixed;bottom:78px;left:50%;transform:translateX(-50%);background:var(--panel2);border:1px solid var(--acc);color:var(--ink);padding:11px 18px;border-radius:12px;font-size:14px;z-index:90;opacity:0;transition:.3s;pointer-events:none}.toast.on{opacity:1}
   .foot{color:var(--faint);font-size:12px;font-family:var(--mono);text-align:center;padding:30px 0 26px;border-top:1px solid var(--line);margin-top:30px;line-height:1.7}
+  .finbox{background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:15px;margin-top:14px}
+  .finrow{display:flex;gap:8px;margin-top:4px}
+  .finrow input,.finrow select{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:9px;color:var(--ink);font-size:13px;padding:9px 10px;outline:none}
+  .finrow input:focus,.finrow select:focus{border-color:var(--acc)}
+  .finout{font-family:var(--mono);font-size:22px;font-weight:700;color:var(--acc);margin-top:10px}
+  .flow{display:flex;gap:8px;margin-top:6px}.flow .st{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:9px;text-align:center;font-size:10.5px;color:var(--dim)}.flow .st b{display:block;color:var(--ink);font-size:12px;margin-bottom:3px}
 </style>
 </head>
 <body>
@@ -199,6 +205,7 @@
   <div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-ghost btn-sm" id="iCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="iApprove" style="flex:1">Approve &amp; list</button></div>
 </div></div>
 
+<div class="modal" id="depModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Deposit to bid</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">A refundable <b style="color:var(--ink)">£500</b> deposit is held while you bid. <b style="color:var(--gold)">Demo — no real charge is made.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="depCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="depPay" style="flex:1">Place £500 deposit</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -212,7 +219,7 @@
   // ===== BACKEND CONNECTION (Supabase) =====
   // Paste your two values between the quotes below, then deploy.
   const SUPABASE_URL = "https://nieybhvdaxrqfmzflgvb.supabase.co";   // <-- your Project URL (check it matches yours)
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5pZXliaHZkYXhycWZtemZsZ3ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODA4NjU3ODEsImV4cCI6MjA5NjQ0MTc4MX0.4TrZ3OTjAgtNq9vrbBQtswYGd1J_XySdzREQUoezFFQ";        // <-- paste your anon / public key here
+  const SUPABASE_ANON_KEY = "PASTE_YOUR_ANON_PUBLIC_KEY_HERE";        // <-- paste your anon / public key here
   let sb=null;
   try{ if(window.supabase && SUPABASE_URL.indexOf('http')===0 && SUPABASE_ANON_KEY.indexOf('PASTE')!==0){ sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY); } }catch(e){ console.error('supabase init',e); }
   function lget(k){try{const r=localStorage.getItem(k);return r?JSON.parse(r):null;}catch(e){return null;}}
@@ -338,6 +345,13 @@
         <div class="box flat"><h4>Vehicle</h4><div class="spec"><div class="k">Mileage</div><div class="v">${c.mileage.toLocaleString()} mi</div><div class="k">Owners</div><div class="v">${c.owners}</div><div class="k">MOT</div><div class="v">${c.mot||'—'}</div><div class="k">Service</div><div class="v">${c.svc||'—'}</div></div></div>
         <div class="box flat insp" style="margin-top:14px"><h4>Inspection report${ip.by?' · '+ip.by:''}</h4>${insp.map(([k,s,v])=>`<div class="row"><span>${k}</span><span class="${s}">${s==='ok'?'✓ ':'⚠ '}${v}</span></div>`).join('')}<div class="vid"><span>▶ Cold-start</span><span>▶ Driving</span><span>▶ Walkaround</span></div></div>
         <div class="box flat" style="margin-top:14px"><h4>Photos (52)</h4><div class="gallery">${Array.from({length:8}).map(()=>`<div class="g">${carSVG('p'+Math.random())}</div>`).join('')}</div></div>
+        <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Finance calculator <span style="color:var(--faint);text-transform:none;letter-spacing:0">· illustrative 9.9% APR</span></h4>
+          <div class="finrow"><input id="finDep" type="number" placeholder="Deposit £"><select id="finTerm"><option value="24">24 mo</option><option value="36">36 mo</option><option value="48" selected>48 mo</option><option value="60">60 mo</option></select></div>
+          <div class="finout" id="finOut">—</div></div>
+        <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Make an offer</h4>
+          <div class="finrow"><input id="offerIn" type="number" placeholder="Your offer £"><button class="btn btn-ghost btn-sm" id="offerSend">Send</button></div></div>
+        <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">How payment works <span style="color:var(--faint);text-transform:none;letter-spacing:0">· demo</span></h4>
+          <div class="flow"><div class="st"><b>1 · Deposit</b>£500 refundable to bid</div><div class="st"><b>2 · Win &amp; pay</b>balance on win</div><div class="st"><b>3 · Escrow</b>released on collection</div></div></div>
       </div><div>
         <div class="box flat"><div class="timer-l">Auction ends in</div><div class="timer" id="bigTimer">--</div>
           <div class="cur"><div class="timer-l">Current bid</div><div class="bv" id="curBid">${gbp(c.bid)}</div><div class="rs" id="resStat"></div></div>
@@ -347,12 +361,19 @@
       </div></div></div>`;
     $('#ov').classList.add('on');document.body.style.overflow='hidden';$('#closeX').onclick=closeCar;refreshModal();
     $('#bidBtn').onclick=placeBid;$('#bidIn').onkeydown=e=>{if(e.key==='Enter')placeBid();};
+    if($('#finDep')){$('#finDep').oninput=calcFin;$('#finTerm').onchange=calcFin;calcFin();}
+    if($('#offerSend'))$('#offerSend').onclick=sendOffer;
     if(tick)clearInterval(tick);tick=setInterval(()=>{const t=$('#bigTimer');const c=getActive();if(!t||!c)return;const ms=c.ends-Date.now();t.textContent=ms<=0?'ENDED':fmt(ms);t.classList.toggle('urgent',ms<12e4&&ms>0);},1000);
   }
   function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const o=c.mkt-c.bid;$('#oppBig').textContent=(o>=0?'+':'')+gbp(o);$('#oppBig').style.color=o>0?'var(--acc)':'var(--red)';$('#oppSub').textContent='Est. market '+gbp(c.mkt)+' vs bid '+gbp(c.bid);$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
-  async function placeBid(){if(!needName())return;const c=getActive();if(!c)return;if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
+  async function placeBid(){if(!needName())return;if(!user.deposited){$('#depModal').classList.add('on');return;}const c=getActive();if(!c)return;if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
     const fresh=await sget('vaa_auctions',true);if(fresh)cars=fresh;const cc=getActive();if(v<=cc.bid){toast('Someone just bid '+gbp(cc.bid));refreshModal();return;}
     let ext=false;if(cc.ends-Date.now()<12e4){cc.ends+=12e4;ext=true;}cc.bid=v;cc.hist=cc.hist||[];cc.hist.unshift([user.name,v]);tops[cc.id]=user.name;await saveCars();$('#bidIn').value='';refreshModal();renderHome();addNotif('You bid '+gbp(v)+' on '+cc.t+'.');toast(ext?'Bid placed — timer +2 min (anti-snipe)':'You are the highest bidder ✓');}
+  const priceFor=c=>c.mkt||c.bid;
+  function calcFin(){const c=getActive();if(!c||!$('#finOut'))return;const dep=Math.max(0,+($('#finDep').value||0));const term=+$('#finTerm').value||48;const fin=Math.max(0,priceFor(c)-dep);const monthly=fin*(1+0.099*(term/12))/term;$('#finOut').textContent=(isFinite(monthly)&&monthly>0)?gbp(monthly)+'/mo':'—';}
+  async function sendOffer(){if(!needName())return;const c=getActive();if(!c)return;const amt=+$('#offerIn').value;if(!amt){toast('Enter an amount');return;}c.offers=c.offers||[];c.offers.push({name:user.name,amount:amt,time:Date.now()});await saveCars();$('#offerIn').value='';toast('Offer of '+gbp(amt)+' sent to seller ✓');}
+  $('#depCancel').onclick=()=>$('#depModal').classList.remove('on');
+  $('#depPay').onclick=async()=>{if(user){user.deposited=true;await saveUser();}$('#depModal').classList.remove('on');toast('£500 deposit placed (demo)');placeBid();};
   function closeCar(){$('#ov').classList.remove('on');document.body.style.overflow='';activeId=null;if(tick)clearInterval(tick);renderCurrent();}
   $('#ov').onclick=e=>{if(e.target===$('#ov'))closeCar();};
 
