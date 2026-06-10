@@ -150,8 +150,12 @@
       <div class="fld"><label>Description / known faults</label><textarea id="sDesc" rows="2"></textarea></div>
     </div>
     <div class="sstep" data-step="2" style="display:none">
-      <div class="fld"><label>Photos</label><div class="drop">📷 Photos (prototype: upload disabled — listing still works)</div></div>
-      <div class="fld"><label>Service history & MOT</label><div class="drop">📄 Documents</div></div>
+      <div class="fld"><label>Photos (exterior / interior / engine)</label>
+        <input type="file" id="sPhotos" multiple accept="image/*" style="width:100%;background:var(--panel2);border:1px solid var(--line);border-radius:9px;color:var(--dim);font-size:13px;padding:9px 10px">
+        <div id="sPhotoStatus" style="font-size:12px;color:var(--faint);font-family:var(--mono);margin-top:6px"></div>
+        <div id="sPhotoGrid" class="gallery" style="margin-top:8px"></div>
+      </div>
+      <div class="fld"><label>Service history & MOT</label><div class="drop">📄 Documents (coming soon)</div></div>
     </div>
     <div class="sstep" data-step="3" style="display:none">
       <div class="fld"><label>Reserve price (£)</label><input id="sReserve" type="number" placeholder="9500"></div>
@@ -261,7 +265,7 @@
     mk({id:'c6',make:'Vauxhall',model:'Corsa',year:2016,mileage:58900,fuel:'Petrol',trans:'Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',insp:{ext:'Fair',int:'Fair',tyre:'Fair',brk:'Fair',obd:'EML on — needs diag',body:'Panel scuffs',by:'R. Mills'},hist:[['budget_cars',3650]]})
   ];}
 
-  let cars=[],pending=[],user=null,compare=[],tops={},quotes=[];
+  let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[];
   async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
   const saveCars=()=>sset('vaa_auctions',cars,true);const savePending=()=>sset('vaa_pending',pending,true);const saveUser=()=>user?sset('vaa_u_'+user.key,{name:user.name,watch:user.watch,searches:user.searches,notifs:user.notifs,deposited:user.deposited},false):null;
 
@@ -269,9 +273,9 @@
   function addNotif(text){if(!user)return;user.notifs=user.notifs||[];user.notifs.unshift({text,time:Date.now(),read:false});user.notifs=user.notifs.slice(0,30);saveUser();renderBell();}
   function renderBell(){const u=user&&user.notifs?user.notifs.filter(n=>!n.read).length:0;const d=$('#bellDot');d.textContent=u;d.classList.toggle('on',u>0);}
 
-  const cardHTML=c=>{const opp=c.mkt-c.bid,w=user&&user.watch&&user.watch.includes(c.id),inC=compare.includes(c.id);return `<div class="card">
-    <div class="ph" data-open="${c.id}" style="background:linear-gradient(135deg,#16202e,#0e1620)"><span class="ver pill p-ver">✓ VERIFIED</span>
-      <div class="acts"><button class="ico cmp ${inC?'on':''}" data-cmp="${c.id}" title="Compare">⇄</button><button class="ico ${w?'on':''}" data-star="${c.id}" title="Watch">${w?'★':'☆'}</button></div>${carSVG(c.id)}<span class="cnt" data-cnt="${c.id}">--</span></div>
+  const cardHTML=c=>{const opp=c.mkt-c.bid,w=user&&user.watch&&user.watch.includes(c.id),inC=compare.includes(c.id),ph0=c.photos&&c.photos[0];return `<div class="card">
+    <div class="ph" data-open="${c.id}" style="${ph0?`background:#0e1620 center/cover url('${ph0}')`:'background:linear-gradient(135deg,#16202e,#0e1620)'}"><span class="ver pill p-ver">✓ VERIFIED</span>
+      <div class="acts"><button class="ico cmp ${inC?'on':''}" data-cmp="${c.id}" title="Compare">⇄</button><button class="ico ${w?'on':''}" data-star="${c.id}" title="Watch">${w?'★':'☆'}</button></div>${ph0?'':carSVG(c.id)}<span class="cnt" data-cnt="${c.id}">--</span></div>
     <div class="cb" data-open="${c.id}"><h3>${c.t}</h3><div class="meta">${c.mi} · ${c.owners} own</div>
       <div class="bidrow"><div><div class="bl">Current bid</div><div class="bv">${gbp(c.bid)}</div></div>${opp>0?`<div class="opp">+${gbp(opp)}</div>`:''}</div>
       <div class="res ${reserveMet(c)?'met':'no'}">${reserveMet(c)?'✓ Reserve met':'Reserve not met'}</div></div></div>`;};
@@ -347,18 +351,21 @@
   function openInspect(i){inspIdx=i;const p=pending[i];$('#inspTitle').textContent=p.t;$('#iObd').value='No fault codes';$('#iBody').value=p.desc||'';$('#iInsp').value='';$('#iDate').value='';$('#inspModal').classList.add('on');}
   $('#iCancel').onclick=()=>$('#inspModal').classList.remove('on');
   $('#iApprove').onclick=async()=>{const p=pending.splice(inspIdx,1)[0];const insp={ext:$('#iExt').value,int:$('#iInt').value,tyre:$('#iTyre').value,brk:$('#iBrk').value,obd:$('#iObd').value||'No fault codes',body:$('#iBody').value||'See report',by:$('#iInsp').value||'Inspector'};
-    const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,ends:Date.now()+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,hist:[['opening_bid',Math.round(p.res*0.8)]]});
+    const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,ends:Date.now()+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,photos:p.photos||[],hist:[['opening_bid',Math.round(p.res*0.8)]]});
     cars.push(car);tops[car.id]='opening_bid';await savePending();await saveCars();$('#inspModal').classList.remove('on');toast('Inspected & listed live ✓');if(p.by===(user&&user.name)){/* lister notify handled below */}addNotif('Your listing "'+p.t+'" passed inspection and is now live.');renderAdmin();renderHome();};
 
   // seller flow
   let step=1;
   function showStep(){$$('.sstep').forEach(s=>s.style.display=+s.dataset.step===step?'block':'none');$$('.step').forEach(s=>{const n=+s.dataset.s;s.classList.toggle('on',n===step);s.classList.toggle('done',n<step);});$('#sBack').style.visibility=step>1?'visible':'hidden';$('#sNext').textContent=step===4?'Submit for verification':'Continue →';}
+  async function uploadPhotos(files){if(!sb){toast('Photo upload works on the live site only');return;}if($('#sPhotoStatus'))$('#sPhotoStatus').textContent='Uploading…';for(const file of files){try{const ext=(file.name.split('.').pop()||'jpg').toLowerCase();const path='cars/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+ext;const {error}=await sb.storage.from('car-photos').upload(path,file,{contentType:file.type||'image/jpeg'});if(error){toast('Upload failed: '+error.message);continue;}const {data}=sb.storage.from('car-photos').getPublicUrl(path);sellPhotos.push(data.publicUrl);}catch(e){toast('Upload error');}}if($('#sPhotoStatus'))$('#sPhotoStatus').textContent=sellPhotos.length+' photo(s) added';renderSellPhotos();}
+  function renderSellPhotos(){const g=$('#sPhotoGrid');if(g)g.innerHTML=sellPhotos.map(u=>`<div class="g" style="overflow:hidden"><img src="${u}" style="width:100%;height:100%;object-fit:cover"></div>`).join('');}
+  if($('#sPhotos'))$('#sPhotos').onchange=e=>uploadPhotos(e.target.files);
   $('#sNext').onclick=async()=>{
     if(step===1&&!$('#sMake').value){toast('Add at least the make');return;}
     if(step===4){if(!needName())return;
-      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,by:user.name});
+      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,photos:sellPhotos.slice(),by:user.name});
       await savePending();addNotif('Your car was submitted for inspection.');toast('Submitted to verification queue ✓');
-      step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt'].forEach(i=>$('#'+i).value='');go('admin');return;}
+      step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt'].forEach(i=>$('#'+i).value='');sellPhotos=[];renderSellPhotos();if($('#sPhotoStatus'))$('#sPhotoStatus').textContent='';if($('#sPhotos'))$('#sPhotos').value='';go('admin');return;}
     step++;showStep();};
   $('#sBack').onclick=()=>{if(step>1)step--;showStep();};
 
@@ -372,7 +379,7 @@
       <div class="dgrid"><div>
         <div class="box flat"><h4>Vehicle</h4><div class="spec"><div class="k">Mileage</div><div class="v">${c.mileage.toLocaleString()} mi</div><div class="k">Owners</div><div class="v">${c.owners}</div><div class="k">MOT</div><div class="v">${c.mot||'—'}</div><div class="k">Service</div><div class="v">${c.svc||'—'}</div></div></div>
         <div class="box flat insp" style="margin-top:14px"><h4>Inspection report${ip.by?' · '+ip.by:''}</h4>${insp.map(([k,s,v])=>`<div class="row"><span>${k}</span><span class="${s}">${s==='ok'?'✓ ':'⚠ '}${v}</span></div>`).join('')}<div class="vid"><span>▶ Cold-start</span><span>▶ Driving</span><span>▶ Walkaround</span></div></div>
-        <div class="box flat" style="margin-top:14px"><h4>Photos (52)</h4><div class="gallery">${Array.from({length:8}).map(()=>`<div class="g">${carSVG('p'+Math.random())}</div>`).join('')}</div></div>
+        <div class="box flat" style="margin-top:14px"><h4>Photos${c.photos&&c.photos.length?' ('+c.photos.length+')':''}</h4><div class="gallery">${(c.photos&&c.photos.length)?c.photos.map(u=>`<div class="g" style="overflow:hidden"><img src="${u}" loading="lazy" style="width:100%;height:100%;object-fit:cover"></div>`).join(''):Array.from({length:8}).map(()=>`<div class="g">${carSVG('p'+Math.random())}</div>`).join('')}</div></div>
         <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Finance calculator <span style="color:var(--faint);text-transform:none;letter-spacing:0">· illustrative 9.9% APR</span></h4>
           <div class="finrow"><input id="finDep" type="number" placeholder="Deposit £"><select id="finTerm"><option value="24">24 mo</option><option value="36">36 mo</option><option value="48" selected>48 mo</option><option value="60">60 mo</option></select></div>
           <div class="finout" id="finOut">—</div></div>
