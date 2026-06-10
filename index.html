@@ -104,7 +104,7 @@
 <body>
 <div class="hd"><div class="vw">
   <div class="brand" data-go="home"><span class="tick">✓</span>Verified<span class="full" style="color:var(--acc)">Auto</span></div>
-  <nav class="nav"><a data-go="home" class="on">Home</a><a data-go="browse">Browse</a><a data-go="sell">Sell</a><a data-go="dash">Account</a><a data-go="admin">Admin</a></nav>
+  <nav class="nav"><a data-go="home" class="on">Home</a><a data-go="browse">Browse</a><a data-go="sell">Sell</a><a data-go="dash">Account</a><a data-go="admin">Admin</a><a data-go="mech">🔧&nbsp;Mechanics</a></nav>
   <div class="spacer"></div>
   <button class="bell" id="bellBtn">🔔<span class="dot" id="bellDot">0</span></button>
   <span class="who" id="whoLbl"></span>
@@ -183,6 +183,12 @@
   <div class="box"><h4>Fee revenue — last 6 months</h4><div class="bar" id="revBar"></div></div>
 </div></section>
 
+<section class="view" id="view-mech"><div class="vw" style="padding:22px 0">
+  <h1 class="ph2">🔧 Mechanic network</h1><p class="sub" style="color:var(--faint);margin-bottom:14px">Traders post repair jobs on a car; registered mechanics send quotes back. This is the part nobody else has.</p>
+  <div class="box" style="margin-bottom:18px"><h4>My repair requests &amp; quotes received</h4><div id="myReqList"></div></div>
+  <div class="box"><h4>Open jobs — send a quote</h4><div id="mechList"></div></div>
+</div></section>
+
 <div class="foot">Working prototype with saved data. No real payments, identity checks or security — those need a server. Data is per device unless wired to a shared database.</div>
 
 <div class="ctray" id="ctray"><span class="cl" id="ctrayLbl"></span><button class="btn btn-acc btn-sm" id="ctrayGo">Compare</button><button class="btn btn-ghost btn-sm" id="ctrayClear">Clear</button></div>
@@ -217,6 +223,7 @@
 </div></div>
 
 <div class="modal" id="depModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Deposit to bid</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">A refundable <b style="color:var(--ink)">£500</b> deposit is held while you bid. <b style="color:var(--gold)">Demo — no real charge is made.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="depCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="depPay" style="flex:1">Place £500 deposit</button></div></div></div>
+<div class="modal" id="reqModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Request repair quotes</h4><div id="reqCar" style="font-weight:700;margin-bottom:10px"></div><textarea class="ctrl" id="reqIssue" rows="3" placeholder="What needs doing? e.g. front discs & pads, DPF light, O/S/F alloy refurb" style="width:100%;margin-bottom:12px"></textarea><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="reqCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="reqSend" style="flex:1">Send to mechanics</button></div></div></div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -254,8 +261,8 @@
     mk({id:'c6',make:'Vauxhall',model:'Corsa',year:2016,mileage:58900,fuel:'Petrol',trans:'Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',insp:{ext:'Fair',int:'Fair',tyre:'Fair',brk:'Fair',obd:'EML on — needs diag',body:'Panel scuffs',by:'R. Mills'},hist:[['budget_cars',3650]]})
   ];}
 
-  let cars=[],pending=[],user=null,compare=[],tops={};
-  async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
+  let cars=[],pending=[],user=null,compare=[],tops={},quotes=[];
+  async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
   const saveCars=()=>sset('vaa_auctions',cars,true);const savePending=()=>sset('vaa_pending',pending,true);const saveUser=()=>user?sset('vaa_u_'+user.key,{name:user.name,watch:user.watch,searches:user.searches,notifs:user.notifs,deposited:user.deposited},false):null;
 
   const reserveMet=c=>typeof c.res==='number'?c.bid>=c.res:true;
@@ -287,9 +294,9 @@
     const rev=[9200,11800,10400,14600,15900,Math.round(cars.reduce((s,c)=>s+c.bid*0.08,0))||12000];const mx=Math.max(...rev);const mo=['Jan','Feb','Mar','Apr','May','Now'];
     $('#revBar').innerHTML=rev.map((v,i)=>`<div class="b" style="height:${Math.max(6,v/mx*100)}%"><span>£${(v/1000).toFixed(1)}k</span><em>${mo[i]}</em></div>`).join('');
   }
-  function renderCurrent(){const v=$('.view.on').id.replace('view-','');renderHome();if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();updateCtray();}
+  function renderCurrent(){const v=$('.view.on').id.replace('view-','');renderHome();if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();if(v==='mech')renderMech();updateCtray();}
 
-  function go(v){$$('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));$$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();}
+  function go(v){$$('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));$$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();if(v==='mech')renderMech();}
 
   // ===== auth (Supabase email/password, with name fallback) =====
   async function loadUserData(key,name,email){const d=await sget('vaa_u_'+key,false)||{};user={key,name:name||d.name||'user',email:email||null,watch:d.watch||[],searches:d.searches||[],notifs:d.notifs||[],deposited:!!d.deposited};}
@@ -330,6 +337,8 @@
     const op=e.target.closest('[data-open]');if(op){openCar(op.dataset.open);return;}
     const se=e.target.closest('[data-search]');if(se){const s=user.searches[+se.dataset.search];$('#fSearch').value=s.f.q||'';$('#fMake').value=s.f.make||'';$('#fFuel').value=s.f.fuel||'';$('#fYear').value=s.f.year||0;$('#fPrice').value=s.f.price||0;go('browse');return;}
     const ins=e.target.closest('[data-inspect]');if(ins){openInspect(+ins.dataset.inspect);return;}
+    const qq=e.target.closest('[data-quote]');if(qq){if(!needName())return;const id=qq.dataset.quote;const pe=document.querySelector('[data-qp="'+id+'"]'),de=document.querySelector('[data-qd="'+id+'"]');const price=+(pe&&pe.value);const days=+(de&&de.value)||3;if(!price){toast('Enter a price');return;}const req=quotes.find(x=>x.id===id);if(req){req.list.push({mech:user.name,price,days,time:Date.now()});await saveQuotes();renderMech();toast('Quote submitted ✓');}return;}
+    const ac=e.target.closest('[data-accept]');if(ac){const parts=ac.dataset.accept.split('|');const req=quotes.find(x=>x.id===parts[0]);if(req){req.status='accepted';req.accepted=+parts[1];await saveQuotes();renderMech();toast('Quote accepted ✓');}return;}
   });
   ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{if(['fSearch','fMake','fFuel','fYear','fPrice','fSort'].includes(e.target.id))renderBrowse();}));
 
@@ -369,6 +378,8 @@
           <div class="finout" id="finOut">—</div></div>
         <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Make an offer</h4>
           <div class="finrow"><input id="offerIn" type="number" placeholder="Your offer £"><button class="btn btn-ghost btn-sm" id="offerSend">Send</button></div></div>
+        <div class="finbox"><h4 style="margin:0 0 8px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Repair quotes</h4>
+          <button class="btn btn-ghost btn-sm" id="reqQuote" style="width:100%">🔧 Request quotes from mechanics</button></div>
         <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">How payment works <span style="color:var(--faint);text-transform:none;letter-spacing:0">· demo</span></h4>
           <div class="flow"><div class="st"><b>1 · Deposit</b>£500 refundable to bid</div><div class="st"><b>2 · Win &amp; pay</b>balance on win</div><div class="st"><b>3 · Escrow</b>released on collection</div></div></div>
       </div><div>
@@ -382,6 +393,7 @@
     $('#bidBtn').onclick=placeBid;$('#bidIn').onkeydown=e=>{if(e.key==='Enter')placeBid();};
     if($('#finDep')){$('#finDep').oninput=calcFin;$('#finTerm').onchange=calcFin;calcFin();}
     if($('#offerSend'))$('#offerSend').onclick=sendOffer;
+    if($('#reqQuote'))$('#reqQuote').onclick=openReqModal;
     if(tick)clearInterval(tick);tick=setInterval(()=>{const t=$('#bigTimer');const c=getActive();if(!t||!c)return;const ms=c.ends-Date.now();t.textContent=ms<=0?'ENDED':fmt(ms);t.classList.toggle('urgent',ms<12e4&&ms>0);},1000);
   }
   function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const o=c.mkt-c.bid;$('#oppBig').textContent=(o>=0?'+':'')+gbp(o);$('#oppBig').style.color=o>0?'var(--acc)':'var(--red)';$('#oppSub').textContent='Est. market '+gbp(c.mkt)+' vs bid '+gbp(c.bid);$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
@@ -393,12 +405,23 @@
   async function sendOffer(){if(!needName())return;const c=getActive();if(!c)return;const amt=+$('#offerIn').value;if(!amt){toast('Enter an amount');return;}c.offers=c.offers||[];c.offers.push({name:user.name,amount:amt,time:Date.now()});await saveCars();$('#offerIn').value='';toast('Offer of '+gbp(amt)+' sent to seller ✓');}
   $('#depCancel').onclick=()=>$('#depModal').classList.remove('on');
   $('#depPay').onclick=async()=>{if(user){user.deposited=true;await saveUser();}$('#depModal').classList.remove('on');toast('£500 deposit placed (demo)');placeBid();};
+  // ===== mechanic quote network =====
+  const saveQuotes=()=>sset('vaa_quotes',quotes,true);
+  function openReqModal(){if(!needName())return;const c=getActive();if(!c)return;$('#reqCar').textContent=c.t;$('#reqIssue').value=(c.insp&&c.insp.body&&c.insp.body!=='Excellent')?c.insp.body:'';$('#reqModal').classList.add('on');}
+  $('#reqCancel').onclick=()=>$('#reqModal').classList.remove('on');
+  $('#reqSend').onclick=async()=>{const c=getActive();if(!c)return;const issue=$('#reqIssue').value.trim();if(!issue){toast('Describe the work needed');return;}quotes.unshift({id:'rq'+Date.now(),carId:c.id,carTitle:c.t,by:user.name,issue,list:[],status:'open',time:Date.now()});await saveQuotes();$('#reqModal').classList.remove('on');addNotif('Repair request posted for '+c.t+'.');toast('Sent to the mechanic network ✓');};
+  function renderMech(){
+    const mine=quotes.filter(q=>user&&q.by===user.name);
+    if($('#myReqList'))$('#myReqList').innerHTML=mine.length?mine.map(q=>`<div style="padding:11px 0;border-bottom:1px solid var(--line)"><div style="font-size:14px;font-weight:600">${q.carTitle} <span class="pill ${q.status==='accepted'?'p-opp':'p-pend'}">${q.status==='accepted'?'accepted':q.list.length+' quotes'}</span></div><div style="font-size:12px;color:var(--faint);font-family:var(--mono);margin:3px 0 6px">${q.issue}</div>${q.list.length?q.list.map((x,i)=>`<div style="display:flex;justify-content:space-between;align-items:center;font-size:13px;font-family:var(--mono);padding:5px 0"><span>${x.mech} · ${gbp(x.price)} · ${x.days}d</span>${q.status!=='accepted'?`<button class="btn btn-acc btn-sm" data-accept="${q.id}|${i}">Accept</button>`:(q.accepted===i?'<span style="color:var(--acc)">✓ chosen</span>':'')}</div>`).join(''):'<div style="font-size:12px;color:var(--faint)">No quotes yet.</div>'}</div>`).join(''):'<div class="empty">Open a car and tap "Request quotes from mechanics" to post a job.</div>';
+    const open=quotes.filter(q=>q.status==='open');
+    if($('#mechList'))$('#mechList').innerHTML=open.length?open.map(q=>`<div style="padding:11px 0;border-bottom:1px solid var(--line)"><div style="font-size:14px;font-weight:600">${q.carTitle}</div><div style="font-size:12px;color:var(--faint);font-family:var(--mono);margin:3px 0 8px">${q.issue} · by ${q.by} · ${q.list.length} quotes</div><div class="finrow"><input type="number" placeholder="£ price" data-qp="${q.id}"><input type="number" placeholder="days" data-qd="${q.id}"><button class="btn btn-acc btn-sm" data-quote="${q.id}">Quote</button></div></div>`).join(''):'<div class="empty">No open jobs right now. Post one from a car page.</div>';
+  }
   function closeCar(){$('#ov').classList.remove('on');document.body.style.overflow='';activeId=null;if(tick)clearInterval(tick);renderCurrent();}
   $('#ov').onclick=e=>{if(e.target===$('#ov'))closeCar();};
 
   // countdowns + sync poll (detect outbid)
   setInterval(()=>{$$('[data-cnt]').forEach(el=>{const c=cars.find(x=>x.id==el.dataset.cnt);if(c)el.textContent='⏱ '+fmt(c.ends-Date.now());});},1000);
-  setInterval(async()=>{const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}},5000);
+  setInterval(async()=>{const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}const fq=await sget('vaa_quotes',true);if(fq){quotes=fq;if($('#view-mech').classList.contains('on'))renderMech();}},5000);
 
   let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
 
