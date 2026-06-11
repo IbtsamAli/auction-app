@@ -226,7 +226,7 @@
   <div style="display:flex;gap:8px;margin-top:4px"><button class="btn btn-ghost btn-sm" id="iCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="iApprove" style="flex:1">Approve &amp; list</button></div>
 </div></div>
 
-<div class="modal" id="depModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Deposit to bid</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">A refundable <b style="color:var(--ink)">£500</b> deposit is held while you bid. <b style="color:var(--gold)">Demo — no real charge is made.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="depCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="depPay" style="flex:1">Place £500 deposit</button></div></div></div>
+<div class="modal" id="depModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Deposit to bid</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">A refundable <b style="color:var(--ink)">£500</b> deposit is held while you bid. <b style="color:var(--gold)">Test mode — pay with card 4242 4242 4242 4242, any future expiry &amp; CVC. No real money moves.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="depCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="depPay" style="flex:1">Place £500 deposit</button></div></div></div>
 <div class="modal" id="reqModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Request repair quotes</h4><div id="reqCar" style="font-weight:700;margin-bottom:10px"></div><textarea class="ctrl" id="reqIssue" rows="3" placeholder="What needs doing? e.g. front discs & pads, DPF light, O/S/F alloy refurb" style="width:100%;margin-bottom:12px"></textarea><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="reqCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="reqSend" style="flex:1">Send to mechanics</button></div></div></div>
 <div class="toast" id="toast"></div>
 
@@ -411,7 +411,8 @@
   function calcFin(){const c=getActive();if(!c||!$('#finOut'))return;const dep=Math.max(0,+($('#finDep').value||0));const term=+$('#finTerm').value||48;const fin=Math.max(0,priceFor(c)-dep);const monthly=fin*(1+0.099*(term/12))/term;$('#finOut').textContent=(isFinite(monthly)&&monthly>0)?gbp(monthly)+'/mo':'—';}
   async function sendOffer(){if(!needName())return;const c=getActive();if(!c)return;const amt=+$('#offerIn').value;if(!amt){toast('Enter an amount');return;}c.offers=c.offers||[];c.offers.push({name:user.name,amount:amt,time:Date.now()});await saveCars();$('#offerIn').value='';toast('Offer of '+gbp(amt)+' sent to seller ✓');}
   $('#depCancel').onclick=()=>$('#depModal').classList.remove('on');
-  $('#depPay').onclick=async()=>{if(user){user.deposited=true;await saveUser();}$('#depModal').classList.remove('on');toast('£500 deposit placed (demo)');placeBid();};
+  async function payDeposit(){if(!sb){if(user){user.deposited=true;await saveUser();}$('#depModal').classList.remove('on');toast('Deposit placed (demo — works for real on the live site)');placeBid();return;}const b=$('#depPay');b.disabled=true;b.textContent='Opening secure checkout…';try{const {data,error}=await sb.functions.invoke('create-checkout',{body:{amount:50000,title:'Verified Auto Auctions — bidding deposit',origin:location.origin}});if(error||!data||!data.url){toast('Could not start checkout — try again');b.disabled=false;b.textContent='Place £500 deposit';return;}location.href=data.url;}catch(e){toast('Checkout error');b.disabled=false;b.textContent='Place £500 deposit';}}
+  $('#depPay').onclick=payDeposit;
   // ===== mechanic quote network =====
   const saveQuotes=()=>sset('vaa_quotes',quotes,true);
   function openReqModal(){if(!needName())return;const c=getActive();if(!c)return;$('#reqCar').textContent=c.t;$('#reqIssue').value=(c.insp&&c.insp.body&&c.insp.body!=='Excellent')?c.insp.body:'';$('#reqModal').classList.add('on');}
@@ -432,7 +433,7 @@
 
   let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
 
-  (async function init(){await loadAll();$('#fMake').innerHTML='<option value="">Any make</option>'+[...new Set(cars.map(c=>c.make))].sort().map(m=>`<option>${m}</option>`).join('');if(sb){try{const {data:{session}}=await sb.auth.getSession();if(session)await afterAuth();}catch(e){}}updateWho();renderBell();renderHome();showStep();})();
+  (async function init(){await loadAll();$('#fMake').innerHTML='<option value="">Any make</option>'+[...new Set(cars.map(c=>c.make))].sort().map(m=>`<option>${m}</option>`).join('');if(sb){try{const {data:{session}}=await sb.auth.getSession();if(session)await afterAuth();}catch(e){}}const _q=new URLSearchParams(location.search);if(_q.get('paid')==='1'){if(user){user.deposited=true;await saveUser();}toast('✓ Deposit received — you are cleared to bid');history.replaceState({},'',location.pathname);}else if(_q.get('canceled')==='1'){toast('Payment canceled');history.replaceState({},'',location.pathname);}updateWho();renderBell();renderHome();showStep();})();
 })();
 </script>
 </body>
