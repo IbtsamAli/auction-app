@@ -160,6 +160,7 @@
     <div class="sstep" data-step="3" style="display:none">
       <div class="fld"><label>Reserve price (£)</label><input id="sReserve" type="number" placeholder="9500"></div>
       <div class="fld"><label>Estimated market value (£) — for the margin signal</label><input id="sMkt" type="number" placeholder="11000"></div>
+      <div class="fld"><label>Buy It Now price (£) — optional, lets buyers purchase instantly</label><input id="sBin" type="number" placeholder="optional"></div>
     </div>
     <div class="sstep" data-step="4" style="display:none">
       <p style="font-size:14px;color:var(--dim);margin-bottom:12px">Submit for verification. Admin inspects it, then it goes live as a timed auction.</p>
@@ -268,14 +269,14 @@
 
   let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[];
   async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];qa=await sget('vaa_qa',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
-  const saveCars=()=>sset('vaa_auctions',cars,true);const savePending=()=>sset('vaa_pending',pending,true);const saveUser=()=>user?sset('vaa_u_'+user.key,{name:user.name,watch:user.watch,searches:user.searches,notifs:user.notifs,deposited:user.deposited},false):null;
+  const saveCars=()=>sset('vaa_auctions',cars,true);const savePending=()=>sset('vaa_pending',pending,true);const saveUser=()=>user?sset('vaa_u_'+user.key,{name:user.name,watch:user.watch,searches:user.searches,notifs:user.notifs,deposited:user.deposited,payIntent:user.payIntent},false):null;
 
   const reserveMet=c=>typeof c.res==='number'?c.bid>=c.res:true;
   function addNotif(text){if(!user)return;user.notifs=user.notifs||[];user.notifs.unshift({text,time:Date.now(),read:false});user.notifs=user.notifs.slice(0,30);saveUser();renderBell();}
   function renderBell(){const u=user&&user.notifs?user.notifs.filter(n=>!n.read).length:0;const d=$('#bellDot');d.textContent=u;d.classList.toggle('on',u>0);}
 
   const cardHTML=c=>{const opp=c.mkt-c.bid,w=user&&user.watch&&user.watch.includes(c.id),inC=compare.includes(c.id),ph0=c.photos&&c.photos[0];return `<div class="card">
-    <div class="ph" data-open="${c.id}" style="${ph0?`background:#0e1620 center/cover url('${ph0}')`:'background:linear-gradient(135deg,#16202e,#0e1620)'}"><span class="ver pill p-ver">✓ VERIFIED</span>
+    <div class="ph" data-open="${c.id}" style="${ph0?`background:#0e1620 center/cover url('${ph0}')`:'background:linear-gradient(135deg,#16202e,#0e1620)'}"><span class="ver pill p-ver">✓ VERIFIED</span>${c.sold?'<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,20,.62);color:#fff;font-weight:800;letter-spacing:.2em;font-size:18px">SOLD</span>':''}
       <div class="acts"><button class="ico cmp ${inC?'on':''}" data-cmp="${c.id}" title="Compare">⇄</button><button class="ico ${w?'on':''}" data-star="${c.id}" title="Watch">${w?'★':'☆'}</button></div>${ph0?'':carSVG(c.id)}<span class="cnt" data-cnt="${c.id}">--</span></div>
     <div class="cb" data-open="${c.id}"><h3>${c.t}</h3><div class="meta">${c.mi} · ${c.owners} own</div>
       <div class="bidrow"><div><div class="bl">Current bid</div><div class="bv">${gbp(c.bid)}</div></div>${opp>0?`<div class="opp">+${gbp(opp)}</div>`:''}</div>
@@ -304,7 +305,7 @@
   function go(v){$$('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));$$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();if(v==='mech')renderMech();}
 
   // ===== auth (Supabase email/password, with name fallback) =====
-  async function loadUserData(key,name,email){const d=await sget('vaa_u_'+key,false)||{};user={key,name:name||d.name||'user',email:email||null,watch:d.watch||[],searches:d.searches||[],notifs:d.notifs||[],deposited:!!d.deposited};}
+  async function loadUserData(key,name,email){const d=await sget('vaa_u_'+key,false)||{};user={key,name:name||d.name||'user',email:email||null,watch:d.watch||[],searches:d.searches||[],notifs:d.notifs||[],deposited:!!d.deposited,payIntent:d.payIntent||null};}
   function openSign(){if(sb){$('#authReal').style.display='block';$('#authFallback').style.display='none';}else{$('#authReal').style.display='none';$('#authFallback').style.display='block';$('#nameIn').value='';}$('#signModal').classList.add('on');}
   function needName(){if(!user){openSign();return false;}return true;}
   async function afterAuth(){const {data:{user:au}}=await sb.auth.getUser();if(!au)return;await loadUserData(au.id,(au.email||'user').split('@')[0],au.email);$('#signModal').classList.remove('on');updateWho();renderBell();renderCurrent();toast('Signed in as '+user.name);}
@@ -352,7 +353,7 @@
   function openInspect(i){inspIdx=i;const p=pending[i];$('#inspTitle').textContent=p.t;$('#iObd').value='No fault codes';$('#iBody').value=p.desc||'';$('#iInsp').value='';$('#iDate').value='';$('#inspModal').classList.add('on');}
   $('#iCancel').onclick=()=>$('#inspModal').classList.remove('on');
   $('#iApprove').onclick=async()=>{const p=pending.splice(inspIdx,1)[0];const insp={ext:$('#iExt').value,int:$('#iInt').value,tyre:$('#iTyre').value,brk:$('#iBrk').value,obd:$('#iObd').value||'No fault codes',body:$('#iBody').value||'See report',by:$('#iInsp').value||'Inspector'};
-    const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,ends:Date.now()+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,photos:p.photos||[],by:p.by,byKey:p.byKey,hist:[['opening_bid',Math.round(p.res*0.8)]]});
+    const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,ends:Date.now()+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,photos:p.photos||[],by:p.by,byKey:p.byKey,bin:p.bin||0,hist:[['opening_bid',Math.round(p.res*0.8)]]});
     cars.push(car);tops[car.id]='opening_bid';await savePending();await saveCars();$('#inspModal').classList.remove('on');toast('Inspected & listed live ✓');if(p.by===(user&&user.name)){/* lister notify handled below */}addNotif('Your listing "'+p.t+'" passed inspection and is now live.');renderAdmin();renderHome();};
 
   // seller flow
@@ -364,9 +365,9 @@
   $('#sNext').onclick=async()=>{
     if(step===1&&!$('#sMake').value){toast('Add at least the make');return;}
     if(step===4){if(!needName())return;
-      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,photos:sellPhotos.slice(),by:user.name,byKey:user.key});
+      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,bin:+$('#sBin').value||0,photos:sellPhotos.slice(),by:user.name,byKey:user.key});
       await savePending();addNotif('Your car was submitted for inspection.');toast('Submitted to verification queue ✓');
-      step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt'].forEach(i=>$('#'+i).value='');sellPhotos=[];renderSellPhotos();if($('#sPhotoStatus'))$('#sPhotoStatus').textContent='';if($('#sPhotos'))$('#sPhotos').value='';go('admin');return;}
+      step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt','sBin'].forEach(i=>$('#'+i).value='');sellPhotos=[];renderSellPhotos();if($('#sPhotoStatus'))$('#sPhotoStatus').textContent='';if($('#sPhotos'))$('#sPhotos').value='';go('admin');return;}
     step++;showStep();};
   $('#sBack').onclick=()=>{if(step>1)step--;showStep();};
 
@@ -395,11 +396,12 @@
         <div class="box flat"><div class="timer-l">Auction ends in</div><div class="timer" id="bigTimer">--</div>
           <div class="cur"><div class="timer-l">Current bid</div><div class="bv" id="curBid">${gbp(c.bid)}</div><div class="rs" id="resStat"></div></div>
           <div class="bidbar"><input id="bidIn" type="number" placeholder="${c.bid+100}"><button class="btn btn-acc" id="bidBtn">Place bid</button></div>
+          ${c.bin&&!c.sold?`<button class="btn btn-sm" id="binBtn" style="width:100%;margin-top:8px;background:var(--gold);color:#1a1205;font-weight:700">⚡ Buy It Now · ${gbp(c.bin)}</button>`:''}${c.sold?`<div style="margin-top:10px;text-align:center;color:var(--red);font-weight:800;letter-spacing:.18em">SOLD${c.soldTo?' · to '+esc(c.soldTo):''}</div>`:''}
           <div class="hist" id="hist"></div></div>
         <div class="oppbox"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Margin opportunity</h4><div class="big" id="oppBig"></div><div style="font-size:12px;color:var(--dim);font-family:var(--mono)" id="oppSub"></div></div>
       </div></div></div>`;
     $('#ov').classList.add('on');document.body.style.overflow='hidden';$('#closeX').onclick=closeCar;refreshModal();
-    $('#bidBtn').onclick=placeBid;$('#bidIn').onkeydown=e=>{if(e.key==='Enter')placeBid();};
+    $('#bidBtn').onclick=placeBid;$('#bidIn').onkeydown=e=>{if(e.key==='Enter')placeBid();};if($('#binBtn'))$('#binBtn').onclick=buyNow;
     if($('#finDep')){$('#finDep').oninput=calcFin;$('#finTerm').onchange=calcFin;calcFin();}
     if($('#offerSend'))$('#offerSend').onclick=sendOffer;
     if($('#reqQuote'))$('#reqQuote').onclick=openReqModal;
@@ -407,15 +409,16 @@
     if(tick)clearInterval(tick);tick=setInterval(()=>{const t=$('#bigTimer');const c=getActive();if(!t||!c)return;const ms=c.ends-Date.now();t.textContent=ms<=0?'ENDED':fmt(ms);t.classList.toggle('urgent',ms<12e4&&ms>0);},1000);
   }
   function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const o=c.mkt-c.bid;$('#oppBig').textContent=(o>=0?'+':'')+gbp(o);$('#oppBig').style.color=o>0?'var(--acc)':'var(--red)';$('#oppSub').textContent='Est. market '+gbp(c.mkt)+' vs bid '+gbp(c.bid);$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
-  async function placeBid(){if(!needName())return;if(!user.deposited){$('#depModal').classList.add('on');return;}const c=getActive();if(!c)return;if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
+  async function placeBid(){if(!needName())return;if(!user.deposited){$('#depModal').classList.add('on');return;}const c=getActive();if(!c)return;if(c.sold){toast('This car has been sold');return;}if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
     const fresh=await sget('vaa_auctions',true);if(fresh)cars=fresh;const cc=getActive();if(v<=cc.bid){toast('Someone just bid '+gbp(cc.bid));refreshModal();return;}
     let ext=false;if(cc.ends-Date.now()<12e4){cc.ends+=12e4;ext=true;}cc.bid=v;cc.hist=cc.hist||[];cc.hist.unshift([user.name,v]);tops[cc.id]=user.name;await saveCars();$('#bidIn').value='';refreshModal();renderHome();addNotif('You bid '+gbp(v)+' on '+cc.t+'.');toast(ext?'Bid placed — timer +2 min (anti-snipe)':'You are the highest bidder ✓');}
   const priceFor=c=>c.mkt||c.bid;
   function calcFin(){const c=getActive();if(!c||!$('#finOut'))return;const dep=Math.max(0,+($('#finDep').value||0));const term=+$('#finTerm').value||48;const fin=Math.max(0,priceFor(c)-dep);const monthly=fin*(1+0.099*(term/12))/term;$('#finOut').textContent=(isFinite(monthly)&&monthly>0)?gbp(monthly)+'/mo':'—';}
   async function sendOffer(){if(!needName())return;const c=getActive();if(!c)return;const amt=+$('#offerIn').value;if(!amt){toast('Enter an amount');return;}c.offers=c.offers||[];c.offers.push({name:user.name,amount:amt,time:Date.now()});await saveCars();$('#offerIn').value='';toast('Offer of '+gbp(amt)+' sent to seller ✓');}
   $('#depCancel').onclick=()=>$('#depModal').classList.remove('on');
-  async function payDeposit(){if(!sb){if(user){user.deposited=true;await saveUser();}$('#depModal').classList.remove('on');toast('Deposit placed (demo — works for real on the live site)');placeBid();return;}const b=$('#depPay');b.disabled=true;b.textContent='Opening secure checkout…';try{const {data,error}=await sb.functions.invoke('create-checkout',{body:{amount:50000,title:'Verified Auto Auctions — bidding deposit',origin:location.origin}});if(error||!data||!data.url){toast('Could not start checkout — try again');b.disabled=false;b.textContent='Place £500 deposit';return;}location.href=data.url;}catch(e){toast('Checkout error');b.disabled=false;b.textContent='Place £500 deposit';}}
+  async function payDeposit(){if(!sb){if(user){user.deposited=true;await saveUser();}$('#depModal').classList.remove('on');toast('Deposit placed (demo — works for real on the live site)');placeBid();return;}const b=$('#depPay');b.disabled=true;b.textContent='Opening secure checkout…';if(user){user.payIntent={type:'deposit'};await saveUser();}try{const {data,error}=await sb.functions.invoke('create-checkout',{body:{amount:50000,title:'Verified Auto Auctions — bidding deposit',origin:location.origin}});if(error||!data||!data.url){toast('Could not start checkout — try again');b.disabled=false;b.textContent='Place £500 deposit';return;}location.href=data.url;}catch(e){toast('Checkout error');b.disabled=false;b.textContent='Place £500 deposit';}}
   $('#depPay').onclick=payDeposit;
+  async function buyNow(){if(!needName())return;const c=getActive();if(!c)return;if(c.sold){toast('This car is already sold');return;}if(!c.bin){toast('No Buy It Now price set');return;}if(!sb){toast('Buy It Now works on the live site');return;}if(user){user.payIntent={type:'buy',carId:c.id};await saveUser();}const b=$('#binBtn');if(b){b.disabled=true;b.textContent='Opening secure checkout…';}try{const {data,error}=await sb.functions.invoke('create-checkout',{body:{amount:Math.round(c.bin*100),title:'Buy It Now — '+c.t,origin:location.origin}});if(error||!data||!data.url){toast('Could not start checkout');if(b){b.disabled=false;b.textContent='⚡ Buy It Now · '+gbp(c.bin);}return;}location.href=data.url;}catch(e){toast('Checkout error');}}
   // ===== mechanic quote network =====
   const saveQuotes=()=>sset('vaa_quotes',quotes,true);
   const saveQA=()=>sset('vaa_qa',qa,true);
@@ -449,7 +452,7 @@
 
   let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
 
-  (async function init(){await loadAll();$('#fMake').innerHTML='<option value="">Any make</option>'+[...new Set(cars.map(c=>c.make))].sort().map(m=>`<option>${m}</option>`).join('');if(sb){try{const {data:{session}}=await sb.auth.getSession();if(session)await afterAuth();}catch(e){}}const _q=new URLSearchParams(location.search);if(_q.get('paid')==='1'){if(user){user.deposited=true;await saveUser();}toast('✓ Deposit received — you are cleared to bid');history.replaceState({},'',location.pathname);}else if(_q.get('canceled')==='1'){toast('Payment canceled');history.replaceState({},'',location.pathname);}updateWho();renderBell();renderHome();showStep();})();
+  (async function init(){await loadAll();$('#fMake').innerHTML='<option value="">Any make</option>'+[...new Set(cars.map(c=>c.make))].sort().map(m=>`<option>${m}</option>`).join('');if(sb){try{const {data:{session}}=await sb.auth.getSession();if(session)await afterAuth();}catch(e){}}const _q=new URLSearchParams(location.search);if(_q.get('paid')==='1'){const pi=user&&user.payIntent;if(pi&&pi.type==='buy'){const bc=cars.find(c=>c.id===pi.carId);if(bc){bc.sold=true;bc.soldTo=user.name;bc.ends=Date.now();await saveCars();}if(user){user.payIntent=null;await saveUser();}toast('✓ Purchase complete — the car is yours');renderHome();}else{if(user){user.deposited=true;user.payIntent=null;await saveUser();}toast('✓ Deposit received — you are cleared to bid');}history.replaceState({},'',location.pathname);}else if(_q.get('canceled')==='1'){if(user){user.payIntent=null;await saveUser();}toast('Payment canceled');history.replaceState({},'',location.pathname);}updateWho();renderBell();renderHome();showStep();})();
 })();
 </script>
 </body>
