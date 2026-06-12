@@ -39,6 +39,11 @@
   .hero h1{font-size:clamp(27px,5vw,42px);font-weight:800;letter-spacing:-.03em;margin:0 0 12px;max-width:18ch}
   .hero h1 .g{background:linear-gradient(120deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
   .hero p{color:var(--dim);font-size:16px;max-width:54ch;margin:0 0 18px}.hero .row{display:flex;gap:12px;flex-wrap:wrap}
+  .how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  .howstep{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .howstep .hn{width:28px;height:28px;border-radius:50%;background:var(--acc);color:#06251c;font-weight:800;display:grid;place-items:center;margin-bottom:10px}
+  .howstep h4{margin:0 0 4px;font-size:15px}.howstep p{margin:0;color:var(--dim);font-size:13px;line-height:1.5}
+  @media(max-width:640px){.how{grid-template-columns:1fr}}
   .sec{padding:26px 0 6px}.sec h2{font-size:18px;font-weight:700;margin:0 0 4px;display:flex;align-items:center;gap:10px}.sec .sub{color:var(--faint);font-size:13px;margin:0 0 16px}
   .ph2{font-size:23px;font-weight:800;letter-spacing:-.02em;margin:24px 0 4px}
   .pill{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.06em}
@@ -104,7 +109,7 @@
 <body>
 <div class="hd"><div class="vw">
   <div class="brand" data-go="home"><span class="tick">✓</span>Verified<span class="full" style="color:var(--acc)">Auto</span></div>
-  <nav class="nav"><a data-go="home" class="on">Home</a><a data-go="browse">Browse</a><a data-go="sell">Sell</a><a data-go="dash">Account</a><a data-go="admin">Admin</a><a data-go="mech">🔧&nbsp;Mechanics</a></nav>
+  <nav class="nav"><a data-go="home" class="on">Home</a><a data-go="browse">Browse</a><a data-go="sell">Sell</a><a data-go="dash">Account</a><a data-go="admin" id="navAdmin" style="display:none">Admin</a><a data-go="mech">🔧&nbsp;Mechanics</a></nav>
   <div class="spacer"></div>
   <button class="bell" id="bellBtn">🔔<span class="dot" id="bellDot">0</span></button>
   <span class="who" id="whoLbl"></span>
@@ -118,6 +123,7 @@
     <p>Timed online auctions with full inspection reports — plus live margin signals for traders.</p>
     <div class="row"><button class="btn btn-acc" data-go="browse">Browse live auctions</button><button class="btn btn-ghost" data-go="sell">List your vehicle</button></div>
   </div></div>
+  <div class="vw"><div class="sec"><h2>How it works</h2><div class="how"><div class="howstep"><div class="hn">1</div><h4>Browse verified cars</h4><p>Every listing is independently inspected, with repair costs quoted upfront — so you know exactly what you're bidding on.</p></div><div class="howstep"><div class="hn">2</div><h4>Verify &amp; join</h4><p>A quick ID check and a one-off £49 membership unlock bidding, buying and selling.</p></div><div class="howstep"><div class="hn">3</div><h4>Bid or Buy It Now</h4><p>Win it at auction, or buy instantly at the fixed price. Pay securely through the platform.</p></div></div></div></div>
   <div class="vw">
     <div class="sec"><h2><span class="pill p-opp">DEALS</span> High-opportunity</h2><p class="sub">Bid below estimated market value.</p><div class="cards" id="oppCards"></div></div>
     <div class="sec"><h2><span class="pill p-live">● LIVE</span> Ending soon</h2><p class="sub">Closing soonest first.</p><div class="cards" id="soonCards"></div></div>
@@ -269,6 +275,8 @@
   ];}
 
   let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[];
+  const ADMIN_EMAILS=['ibtsamali74@gmail.com'];
+  function isAdmin(){return !!(user&&user.email&&ADMIN_EMAILS.includes(String(user.email).toLowerCase()));}
   async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];qa=await sget('vaa_qa',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
   function carState(c){const now=Date.now();if(c.sold)return 'sold';if(c.starts&&now<c.starts)return 'upcoming';if(now>=c.ends)return 'ended';return 'live';}
   function fmtWhen(ts){try{return new Date(ts).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
@@ -286,7 +294,7 @@
       <div class="bidrow"><div><div class="bl">Current bid</div><div class="bv">${gbp(c.bid)}</div></div>${opp>0?`<div class="opp">+${gbp(opp)}</div>`:''}</div>
       <div class="res ${reserveMet(c)?'met':'no'}">${st==='upcoming'?'🗓 Starts '+fmtWhen(c.starts):reserveMet(c)?'✓ Reserve met':'Reserve not met'}</div></div></div>`;};
 
-  function renderHome(){$('#oppCards').innerHTML=[...cars].sort((a,b)=>(b.mkt-b.bid)-(a.mkt-a.bid)).slice(0,3).map(cardHTML).join('')||'<div class="empty">No cars yet.</div>';$('#soonCards').innerHTML=[...cars].sort((a,b)=>a.ends-b.ends).slice(0,3).map(cardHTML).join('')||'<div class="empty">No cars yet.</div>';}
+  function renderHome(){const live=cars.filter(c=>carState(c)==='live'),up=cars.filter(c=>carState(c)==='upcoming').sort((a,b)=>a.starts-b.starts);$('#oppCards').innerHTML=[...live].sort((a,b)=>(b.mkt-b.bid)-(a.mkt-a.bid)).slice(0,3).map(cardHTML).join('')||'<div class="empty">No live auctions right now.</div>';$('#soonCards').innerHTML=[...live].sort((a,b)=>a.ends-b.ends).slice(0,3).map(cardHTML).join('')||'<div class="empty">No live auctions right now.</div>';const us=$('#upcomingSec');if(us){if(up.length){us.style.display='';$('#upcomingCards').innerHTML=up.slice(0,6).map(cardHTML).join('');}else us.style.display='none';}}
   function matches(f){return cars.filter(c=>(!f.q||c.t.toLowerCase().includes(f.q))&&(!f.make||c.make===f.make)&&(!f.fuel||c.fuel===f.fuel)&&(!f.year||c.year>=f.year)&&(!f.price||c.bid<=f.price));}
   function curFilters(){return{q:($('#fSearch').value||'').toLowerCase(),make:$('#fMake').value,fuel:$('#fFuel').value,year:+$('#fYear').value,price:+$('#fPrice').value};}
   function renderBrowse(){const f=curFilters(),sort=$('#fSort').value;let l=matches(f);l.sort((a,b)=>sort==='soon'?a.ends-b.ends:sort==='opp'?(b.mkt-b.bid)-(a.mkt-a.bid):sort==='low'?a.bid-b.bid:b.bid-a.bid);$('#browseCards').innerHTML=l.map(cardHTML).join('');$('#browseEmpty').style.display=l.length?'none':'block';}
@@ -306,7 +314,7 @@
   }
   function renderCurrent(){const v=$('.view.on').id.replace('view-','');renderHome();if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();if(v==='mech')renderMech();updateCtray();}
 
-  function go(v){if(v==='sell'&&!(user&&user.member)){requireMember();return;}$$('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));$$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();if(v==='mech')renderMech();}
+  function go(v){if(v==='admin'&&!isAdmin()){toast('Admins only');return;}if(v==='sell'&&!(user&&user.member)){requireMember();return;}$$('.view').forEach(s=>s.classList.toggle('on',s.id==='view-'+v));$$('.nav a').forEach(a=>a.classList.toggle('on',a.dataset.go===v));window.scrollTo({top:0,behavior:'smooth'});if(v==='browse')renderBrowse();if(v==='dash')renderDash();if(v==='admin')renderAdmin();if(v==='mech')renderMech();}
 
   // ===== auth (Supabase email/password, with name fallback) =====
   async function loadUserData(key,name,email){const d=await sget('vaa_u_'+key,false)||{};user={key,name:name||d.name||'user',email:email||null,watch:d.watch||[],searches:d.searches||[],notifs:d.notifs||[],deposited:!!d.deposited,payIntent:d.payIntent||null,wonNotified:d.wonNotified||[],member:!!d.member,verified:!!d.verified,verifyId:d.verifyId||null};}
@@ -319,7 +327,7 @@
   $('#signBtn').onclick=()=>{ if(user)doLogout(); else openSign(); };
   $('#btnLogin').onclick=doLogin;$('#btnSignup').onclick=doSignup;
   $('#authPw').onkeydown=e=>{if(e.key==='Enter')doLogin();};
-  function updateWho(){$('#whoLbl').textContent=user?('👤 '+user.name+(user.verified?' · ✓ ID':'')+(user.member?' · Member':'')):'';$('#signBtn').textContent=user?'Log out':'Sign in';}
+  function updateWho(){$('#whoLbl').textContent=user?('👤 '+user.name+(user.verified?' · ✓ ID':'')+(user.member?' · Member':'')):'';$('#signBtn').textContent=user?'Log out':'Sign in';const na=$('#navAdmin');if(na)na.style.display=isAdmin()?'':'none';}
 
   // notifications popover
   $('#bellBtn').onclick=()=>{const p=$('#notifPop');const open=!p.classList.contains('on');p.classList.toggle('on',open);if(open){$('#nList').innerHTML=(user&&user.notifs&&user.notifs.length)?user.notifs.map(n=>`<div class="ni">${n.text}<div class="tm">${ago(n.time)}</div></div>`).join(''):'<div class="empty">No notifications yet.</div>';if(user&&user.notifs){user.notifs.forEach(n=>n.read=true);saveUser();renderBell();}}};
