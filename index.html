@@ -440,7 +440,12 @@
 
   // countdowns + sync poll (detect outbid)
   setInterval(()=>{$$('[data-cnt]').forEach(el=>{const c=cars.find(x=>x.id==el.dataset.cnt);if(c)el.textContent='⏱ '+fmt(c.ends-Date.now());});},1000);
-  setInterval(async()=>{const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}const fq=await sget('vaa_quotes',true);if(fq){quotes=fq;if($('#view-mech').classList.contains('on'))renderMech();}const fqa=await sget('vaa_qa',true);if(fqa){qa=fqa;if(activeId&&$('#qaList'))renderQA(getActive());if($('#view-admin').classList.contains('on'))renderAdminQA();}},5000);
+  async function pollOnce(){const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}const fq=await sget('vaa_quotes',true);if(fq){quotes=fq;if($('#view-mech').classList.contains('on'))renderMech();}const fqa=await sget('vaa_qa',true);if(fqa){qa=fqa;if(activeId&&$('#qaList'))renderQA(getActive());if($('#view-admin').classList.contains('on'))renderAdminQA();}}
+  let rtOn=false,rtBusy=false;
+  async function rtPoll(){if(rtBusy)return;rtBusy=true;try{await pollOnce();}finally{rtBusy=false;}}
+  function startRealtime(){if(!sb||rtOn)return;try{sb.channel('vaa_live').on('postgres_changes',{event:'*',schema:'public',table:'app_state'},()=>rtPoll()).subscribe(s=>{if(s==='SUBSCRIBED')rtOn=true;});}catch(e){console.error('realtime',e);}}
+  setInterval(pollOnce,15000);
+  startRealtime();
 
   let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
 
