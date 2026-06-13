@@ -97,7 +97,12 @@
   .ov{position:fixed;inset:0;z-index:50;background:rgba(6,9,7,.76);backdrop-filter:blur(6px);display:none;overflow-y:auto;padding:24px 12px}.ov.on{display:block}
   .dt{max-width:960px;margin:0 auto;background:var(--panel);border:1px solid var(--line);border-radius:18px;overflow:hidden}
   .dt .x{position:sticky;top:0;float:right;margin:12px;z-index:5;width:34px;height:34px;border-radius:9px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:17px}
-  .dt-hero{height:200px;display:grid;place-items:center;position:relative}.dt-hero svg{width:44%}
+  .dt-hero{height:320px;display:grid;place-items:center;position:relative;overflow:hidden}.dt-hero svg{width:44%}.dt-hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+  @media(max-width:640px){.dt-hero{height:220px}}
+  .chatlist{max-height:240px;overflow-y:auto;display:flex;flex-direction:column;gap:9px;margin-bottom:8px;padding-right:2px}
+  .chatmsg{font-size:13px;line-height:1.45;word-break:break-word}
+  .chatmsg .nm{font-family:var(--mono);font-size:11px;color:var(--gold);margin-right:6px;font-weight:700}
+  .chatmsg .tm{font-size:10px;color:var(--faint);font-family:var(--mono);margin-left:6px}
   .dt-body{padding:24px}.dt-body h2{font-family:var(--disp);margin:0 0 4px;font-size:25px;font-weight:600;letter-spacing:-.01em}.dt-body .meta{font-family:var(--mono);color:var(--dim);font-size:13px;margin-bottom:18px}
   .dgrid{display:grid;grid-template-columns:1.25fr 1fr;gap:18px}@media(max-width:760px){.dgrid{grid-template-columns:1fr}}
   .spec{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;font-size:13px}.spec .k{color:var(--faint)}.spec .v{text-align:right;font-family:var(--mono)}
@@ -338,10 +343,10 @@
     mk({id:'c6',make:'Vauxhall',model:'Corsa',year:2016,mileage:58900,fuel:'Petrol',trans:'Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',insp:{ext:'Fair',int:'Fair',tyre:'Fair',brk:'Fair',obd:'EML on — needs diag',body:'Panel scuffs',by:'R. Mills'},hist:[['budget_cars',3650]]})
   ];}
 
-  let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[],apps=[];
+  let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[],apps=[],chat=[];
   const ADMIN_EMAILS=['asphaltscrt@gmail.com'];
   function isAdmin(){return !!(user&&user.email&&ADMIN_EMAILS.includes(String(user.email).toLowerCase()));}
-  async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];qa=await sget('vaa_qa',true)||[];apps=await sget('vaa_applications',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
+  async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];qa=await sget('vaa_qa',true)||[];apps=await sget('vaa_applications',true)||[];chat=await sget('vaa_chat',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
   function carState(c){const now=Date.now();if(c.sold)return 'sold';if(c.starts&&now<c.starts)return 'upcoming';if(now>=c.ends)return 'ended';return 'live';}
   function fmtWhen(ts){try{return new Date(ts).toLocaleString('en-GB',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});}catch(e){return '';}}
   function checkWins(){if(!user)return;user.wonNotified=user.wonNotified||[];let changed=false;cars.forEach(c=>{if(c.sold||Date.now()<c.ends)return;const top=c.hist&&c.hist[0]?c.hist[0][0]:null;if(top===user.name&&reserveMet(c)&&!user.wonNotified.includes(c.id)){user.wonNotified.push(c.id);addNotif('🎉 You won '+c.t+' for '+gbp(c.bid)+'! Complete payment to secure it.');changed=true;}});if(changed)saveUser();}
@@ -470,10 +475,10 @@
 
   // auction modal
   let activeId=null,tick=null;const getActive=()=>cars.find(c=>c.id===activeId);
-  function openCar(id){activeId=id;const c=getActive();if(!c)return;const ip=c.insp||{};
+  function openCar(id){activeId=id;const c=getActive();if(!c)return;const ip=c.insp||{};const ph0=c.photos&&c.photos[0];
     const insp=[['Exterior',(ip.ext||'Good')==='Poor'?'warn':'ok',ip.ext||'Good'],['Interior',(ip.int||'Good')==='Poor'?'warn':'ok',ip.int||'Good'],['Tyres',(ip.tyre||'Good')==='Poor'||(ip.tyre||'')==='Fair'?'warn':'ok',ip.tyre||'Good'],['Brakes',(ip.brk||'Good')==='Poor'?'warn':'ok',ip.brk||'Good'],['OBD scan',(ip.obd||'').includes('No')?'ok':'warn',ip.obd||'No fault codes'],['Body','ok',ip.body||'See report']];
     $('#dt').innerHTML=`<button class="x" id="closeX">✕</button>
-      <div class="dt-hero" style="background:radial-gradient(circle at 30% 20%,#1B2A20,#0B110D)">${carSVG(c.id)}<span class="ver pill p-ver" style="position:absolute;top:14px;left:14px">✓ VERIFIED</span></div>
+      <div class="dt-hero" style="background:radial-gradient(circle at 30% 20%,#1B2A20,#0B110D)">${ph0?`<img src="${ph0}" alt="">`:carSVG(c.id)}<span class="ver pill p-ver" style="position:absolute;top:14px;left:14px">✓ VERIFIED</span>${c.photos&&c.photos.length>1?`<span class="cnt" style="position:absolute;bottom:14px;right:14px">📷 ${c.photos.length} photos</span>`:''}</div>
       <div class="dt-body"><h2>${c.t}</h2><div class="meta">${c.mi} · ${c.owners} owners${c.plate?` · <span class="plate">${esc(c.plate)}</span>`:''}</div>
       <div class="dgrid"><div>
         <div class="box flat"><h4>Vehicle</h4><div class="spec"><div class="k">Mileage</div><div class="v">${c.mileage.toLocaleString()} mi</div><div class="k">Owners</div><div class="v">${c.owners}</div><div class="k">MOT</div><div class="v">${c.mot||'—'}</div><div class="k">Service</div><div class="v">${c.svc||'—'}</div></div></div>
@@ -496,6 +501,7 @@
           ${c.bin&&!c.sold?`<button class="btn btn-sm" id="binBtn" style="width:100%;margin-top:8px;background:var(--gold);color:#1a1205;font-weight:700">⚡ Buy It Now · ${gbp(c.bin)}</button>`:''}${c.sold?`<div style="margin-top:10px;text-align:center;color:var(--red);font-weight:800;letter-spacing:.18em">SOLD${c.soldTo?' · to '+esc(c.soldTo):''}</div>`:''}
           <div class="hist" id="hist"></div></div>
         <div class="oppbox"><h4 style="margin:0 0 6px;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">Estimated profit — all-in</h4><div class="big" id="oppBig"></div><div style="font-size:12px;color:var(--dim);font-family:var(--mono)" id="oppSub"></div><div id="oppRows" style="font-family:var(--mono);font-size:12px;margin-top:10px;border-top:1px solid var(--line);padding-top:8px"></div><div class="finrow" style="margin-top:8px;align-items:center"><span style="font-size:11px;color:var(--faint);text-transform:uppercase;letter-spacing:.07em;flex:0 0 auto">Transport £</span><input type="number" id="oppTrans" placeholder="150" style="max-width:110px"></div></div>
+        <div class="box flat" style="margin-top:14px"><h4>💬 Live chat</h4><div class="chatlist" id="chatList"></div><div class="finrow"><input id="chatInput" type="text" placeholder="Say something about this car…" maxlength="240"><button class="btn btn-ghost btn-sm" id="chatSend">Send</button></div></div>
       </div></div></div>`;
     $('#ov').classList.add('on');document.body.style.overflow='hidden';$('#closeX').onclick=closeCar;refreshModal();
     $('#bidBtn').onclick=placeBid;$('#bidIn').onkeydown=e=>{if(e.key==='Enter')placeBid();};if($('#binBtn'))$('#binBtn').onclick=buyNow;
@@ -505,6 +511,7 @@
     if($('#reqQuote'))$('#reqQuote').onclick=openReqModal;
     if($('#oppTrans'))$('#oppTrans').oninput=refreshModal;
     renderQA(c);if($('#qaAsk'))$('#qaAsk').onclick=askQuestion;if($('#qaInput'))$('#qaInput').onkeydown=e=>{if(e.key==='Enter')askQuestion();};
+    renderChat(c);if($('#chatSend'))$('#chatSend').onclick=sendChatMsg;if($('#chatInput'))$('#chatInput').onkeydown=e=>{if(e.key==='Enter')sendChatMsg();};
     if(tick)clearInterval(tick);tick=setInterval(()=>{const t=$('#bigTimer');const c=getActive();if(!t||!c)return;const st=carState(c);if(st==='upcoming'){t.textContent=fmt(c.starts-Date.now());t.classList.remove('urgent');}else if(st==='sold'){t.textContent='SOLD';t.classList.remove('urgent');}else{const ms=c.ends-Date.now();t.textContent=ms<=0?'ENDED':fmt(ms);t.classList.toggle('urgent',ms<12e4&&ms>0);}},1000);
   }
   const BUYER_FEE=0.05;
@@ -538,6 +545,9 @@
   // ===== mechanic quote network =====
   const saveQuotes=()=>sset('vaa_quotes',quotes,true);
   const saveQA=()=>sset('vaa_qa',qa,true);
+  const saveChat=()=>sset('vaa_chat',chat,true);
+  function renderChat(c){const el=$('#chatList');if(!el||!c)return;const list=chat.filter(m=>m.carId===c.id);el.innerHTML=list.length?list.map(m=>`<div class="chatmsg"><span class="nm">${esc(m.name)}</span>${esc(m.text)}<span class="tm">${ago(m.ts)}</span></div>`).join(''):'<div style="font-size:12px;color:var(--faint)">No messages yet — say hello.</div>';el.scrollTop=el.scrollHeight;}
+  async function sendChatMsg(){if(!needName())return;const c=getActive();if(!c)return;const inp=$('#chatInput');const t=(inp&&inp.value||'').trim();if(!t)return;chat.push({id:'c'+Date.now()+Math.random().toString(36).slice(2,5),carId:c.id,name:user.name,text:t.slice(0,240),ts:Date.now()});const forCar=chat.filter(m=>m.carId===c.id);if(forCar.length>60){const drop=new Set(forCar.slice(0,forCar.length-60).map(m=>m.id));chat=chat.filter(m=>!drop.has(m.id));}await saveChat();if(inp)inp.value='';renderChat(c);}
   function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));}
   function qaFor(id){return qa.filter(x=>x.carId===id).sort((a,b)=>b.ts-a.ts);}
   function renderQA(c){const el=$('#qaList');if(!el||!c)return;const list=qaFor(c.id);const isSeller=user&&c.byKey&&user.key===c.byKey;el.innerHTML=list.length?list.map(x=>`<div style="padding:8px 0;border-bottom:1px solid var(--line)"><div style="font-size:13px;color:var(--ink)"><b>Q:</b> ${esc(x.q)}</div><div style="font-size:11px;color:var(--faint);font-family:var(--mono);margin:2px 0">${esc(x.byName||'Buyer')} · ${ago(x.ts)}</div>${x.a?`<div style="font-size:13px;color:var(--acc);margin-top:4px"><b>A:</b> ${esc(x.a)} <span style="color:var(--faint);font-weight:400">— ${esc(x.aByName||'Seller')}</span></div>`:(isSeller?`<div class="finrow" style="margin-top:6px"><input type="text" data-ansin="${x.id}" placeholder="Answer this…"><button class="btn btn-acc btn-sm" data-ans="${x.id}">Reply</button></div>`:`<div style="font-size:12px;color:var(--amber);margin-top:4px">Awaiting seller answer</div>`)}</div>`).join(''):'<div style="font-size:12px;color:var(--faint)">No questions yet — be the first to ask.</div>';}
@@ -563,7 +573,7 @@
 
   // countdowns + sync poll (detect outbid)
   setInterval(()=>{$$('[data-cnt]').forEach(el=>{const c=cars.find(x=>x.id==el.dataset.cnt);if(!c)return;const st=carState(c);el.textContent=st==='upcoming'?'🕒 '+fmt(c.starts-Date.now()):st==='live'?'⏱ '+fmt(c.ends-Date.now()):st==='sold'?'Sold':'Ended';});checkWins();},1000);
-  async function pollOnce(){const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}const fq=await sget('vaa_quotes',true);if(fq){quotes=fq;if($('#view-mech').classList.contains('on'))renderMech();}const fqa=await sget('vaa_qa',true);if(fqa){qa=fqa;if(activeId&&$('#qaList'))renderQA(getActive());if($('#view-admin').classList.contains('on'))renderAdminQA();}const fap=await sget('vaa_applications',true);if(fap){apps=fap;if($('#view-admin').classList.contains('on'))renderAdminApps();}}
+  async function pollOnce(){const fresh=await sget('vaa_auctions',true);if(fresh){if(user)fresh.forEach(c=>{const newTop=c.hist&&c.hist[0]?c.hist[0][0]:null;if(tops[c.id]===user.name&&newTop&&newTop!==user.name){addNotif('You were outbid on '+c.t+' (now '+gbp(c.bid)+').');}tops[c.id]=newTop;});cars=fresh;if(activeId)refreshModal();else renderCurrent();}const fp=await sget('vaa_pending',true);if(fp){pending=fp;if($('#view-admin').classList.contains('on'))renderAdmin();}const fq=await sget('vaa_quotes',true);if(fq){quotes=fq;if($('#view-mech').classList.contains('on'))renderMech();}const fqa=await sget('vaa_qa',true);if(fqa){qa=fqa;if(activeId&&$('#qaList'))renderQA(getActive());if($('#view-admin').classList.contains('on'))renderAdminQA();}const fap=await sget('vaa_applications',true);if(fap){apps=fap;if($('#view-admin').classList.contains('on'))renderAdminApps();}const fch=await sget('vaa_chat',true);if(fch){chat=fch;if(activeId&&$('#chatList'))renderChat(getActive());}}
   let rtOn=false,rtBusy=false;
   async function rtPoll(){if(rtBusy)return;rtBusy=true;try{await pollOnce();}finally{rtBusy=false;}}
   function startRealtime(){if(!sb||rtOn)return;try{sb.channel('vaa_live').on('postgres_changes',{event:'*',schema:'public',table:'app_state'},()=>rtPoll()).subscribe(s=>{if(s==='SUBSCRIBED')rtOn=true;});}catch(e){console.error('realtime',e);}}
