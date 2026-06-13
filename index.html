@@ -321,7 +321,7 @@
   ];}
 
   let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[],apps=[];
-  const ADMIN_EMAILS=['ibtsamali74@gmail.com'];
+  const ADMIN_EMAILS=['asphatscrt@gmail.com'];
   function isAdmin(){return !!(user&&user.email&&ADMIN_EMAILS.includes(String(user.email).toLowerCase()));}
   async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];qa=await sget('vaa_qa',true)||[];apps=await sget('vaa_applications',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
   function carState(c){const now=Date.now();if(c.sold)return 'sold';if(c.starts&&now<c.starts)return 'upcoming';if(now>=c.ends)return 'ended';return 'live';}
@@ -487,8 +487,13 @@
   function repairsFor(id){return quotes.filter(q=>q.carId===id&&q.status==='accepted'&&q.list[q.accepted]).reduce((s,q)=>s+(+q.list[q.accepted].price||0),0);}
   function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const fee=Math.round(c.bid*BUYER_FEE),rep=repairsFor(c.id),tr=+($('#oppTrans')&&$('#oppTrans').value)||0,allIn=c.bid+fee+rep+tr,p=c.mkt-allIn;$('#oppBig').textContent=(p>=0?'+':'')+gbp(p);$('#oppBig').style.color=p>0?'var(--acc)':'var(--red)';$('#oppSub').textContent=(c.valBy==='inspection'?'Value assessed at inspection: ':'Seller estimate: ')+gbp(c.mkt);if($('#oppRows'))$('#oppRows').innerHTML=[['Current bid',c.bid],['Buyer fee (5%)',fee],['Repairs (accepted quotes)',rep],['Transport',tr]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--faint)">${k}</span><span>${gbp(v)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--line);margin-top:4px"><span style="color:var(--dim)">All-in cost</span><b>${gbp(allIn)}</b></div>`;$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
   async function placeBid(){if(!requireMember())return;if(!user.deposited){$('#depModal').classList.add('on');return;}const c=getActive();if(!c)return;if(c.sold){toast('This car has been sold');return;}if(carState(c)==='upcoming'){toast('Bidding opens '+fmtWhen(c.starts));return;}if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
-    const fresh=await sget('vaa_auctions',true);if(fresh)cars=fresh;const cc=getActive();if(v<=cc.bid){toast('Someone just bid '+gbp(cc.bid));refreshModal();return;}
-    let ext=false;if(cc.ends-Date.now()<12e4){cc.ends+=12e4;ext=true;}cc.bid=v;cc.hist=cc.hist||[];cc.hist.unshift([user.name,v]);tops[cc.id]=user.name;await saveCars();$('#bidIn').value='';refreshModal();renderHome();addNotif('You bid '+gbp(v)+' on '+cc.t+'.');toast(ext?'Bid placed — timer +2 min (anti-snipe)':'You are the highest bidder ✓');}
+    if(!sb){toast('Bidding works on the live site');return;}
+    const btn=$('#bidBtn');if(btn){btn.disabled=true;btn.textContent='Placing bid…';}
+    try{const {data,error}=await sb.functions.invoke('place-bid',{body:{carId:c.id,amount:v}});
+      if(error||!data||data.error){toast(data&&data.error?data.error:'Could not place bid — try again');if(btn){btn.disabled=false;btn.textContent='Place bid';}await pollOnce();return;}
+      tops[c.id]=user.name;await pollOnce();$('#bidIn').value='';refreshModal();renderHome();addNotif('You bid '+gbp(v)+' on '+c.t+'.');toast(data.ends>c.ends?'Bid placed — timer +2 min (anti-snipe)':'You are the highest bidder ✓');
+    }catch(e){toast('Bid error — try again');}
+    if(btn){btn.disabled=false;btn.textContent='Place bid';}}
   const priceFor=c=>c.mkt||c.bid;
   function calcFin(){const c=getActive();if(!c||!$('#finOut'))return;const dep=Math.max(0,+($('#finDep').value||0));const term=+$('#finTerm').value||48;const fin=Math.max(0,priceFor(c)-dep);const monthly=fin*(1+0.099*(term/12))/term;$('#finOut').textContent=(isFinite(monthly)&&monthly>0)?gbp(monthly)+'/mo':'—';}
   async function sendOffer(){if(!needName())return;const c=getActive();if(!c)return;const amt=+$('#offerIn').value;if(!amt){toast('Enter an amount');return;}c.offers=c.offers||[];c.offers.push({name:user.name,amount:amt,time:Date.now()});await saveCars();$('#offerIn').value='';toast('Offer of '+gbp(amt)+' sent to seller ✓');}
