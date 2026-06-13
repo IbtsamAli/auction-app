@@ -3,6 +3,13 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0C120E">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-512.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Verified Auctions">
 <title>Verified Auctions — inspected, verified trade car auctions</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
@@ -36,6 +43,13 @@
   .btn-sm{padding:7px 12px;font-size:13px;border-radius:9px}
   button:disabled{opacity:.55;cursor:not-allowed}
   @media(max-width:880px){.nav a{padding:7px 6px;font-size:12px}.brand span.full,.who{display:none}.notifpop{right:12px}}
+  html,body{overflow-x:clip}
+  @media(max-width:720px){
+    .hd .vw{flex-wrap:wrap;height:auto;padding-top:9px;padding-bottom:9px;row-gap:7px}
+    .nav{order:9;width:100%;margin-left:0;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;display:flex}
+    .nav::-webkit-scrollbar{display:none}
+    .nav a{white-space:nowrap;flex:0 0 auto;font-size:13px;padding:7px 10px}
+  }
   .view{display:none;animation:fade .25s}.view.on{display:block}@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1}}
   .hero{padding:52px 0 24px;background:radial-gradient(ellipse at 16% -10%,rgba(217,165,70,.10),transparent 50%),radial-gradient(ellipse at 95% 0%,rgba(67,201,140,.07),transparent 45%);border-bottom:1px solid rgba(217,165,70,.14)}
   .hero h1{font-family:var(--disp);font-size:clamp(30px,5.4vw,50px);font-weight:600;letter-spacing:-.01em;line-height:1.12;margin:0 0 14px;max-width:21ch}
@@ -495,6 +509,7 @@
   function startRealtime(){if(!sb||rtOn)return;try{sb.channel('vaa_live').on('postgres_changes',{event:'*',schema:'public',table:'app_state'},()=>rtPoll()).subscribe(s=>{if(s==='SUBSCRIBED')rtOn=true;});}catch(e){console.error('realtime',e);}}
   setInterval(pollOnce,15000);
   startRealtime();
+  if('serviceWorker' in navigator){try{navigator.serviceWorker.register('sw.js');}catch(e){}}
 
   let tt;function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('on'),2300);}
 
