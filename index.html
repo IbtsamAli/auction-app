@@ -57,13 +57,14 @@
   .hero p{color:var(--dim);font-size:16.5px;max-width:56ch;margin:0 0 20px}.hero .row{display:flex;gap:12px;flex-wrap:wrap}
   .how{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
   .howstep{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;border-top:2px solid rgba(217,165,70,.4)}
+  .howstep.active{border-color:var(--gold);background:var(--panel2);box-shadow:inset 0 0 0 1px rgba(217,165,70,.35)}
   .howstep .hn{width:28px;height:28px;border-radius:50%;background:linear-gradient(150deg,#E7BC5E,var(--gold2));color:#241803;font-weight:800;display:grid;place-items:center;margin-bottom:10px;font-family:var(--mono);font-size:13px}
   .howstep h4{margin:0 0 4px;font-size:15.5px;font-weight:700}.howstep p{margin:0;color:var(--dim);font-size:13px;line-height:1.55}
   @media(max-width:640px){.how{grid-template-columns:1fr}}
   .sec{padding:28px 0 8px}.sec h2{font-family:var(--disp);font-size:21px;font-weight:600;margin:0 0 4px;display:flex;align-items:center;gap:10px}.sec .sub{color:var(--faint);font-size:13px;margin:0 0 16px}
   .ph2{font-family:var(--disp);font-size:26px;font-weight:600;letter-spacing:-.01em;margin:26px 0 4px}
   .pill{font-family:var(--mono);font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;letter-spacing:.07em}
-  .p-live{background:rgba(229,87,95,.14);color:var(--red)}.p-opp{background:rgba(67,201,140,.13);color:var(--acc)}.p-ver{background:rgba(217,165,70,.14);color:var(--gold)}.p-pend{background:rgba(232,163,61,.14);color:var(--amber)}
+  .p-live{background:rgba(229,87,95,.14);color:var(--red)}.p-opp{background:rgba(67,201,140,.13);color:var(--acc)}.p-ver{background:rgba(217,165,70,.14);color:var(--gold)}.p-pend{background:rgba(232,163,61,.14);color:var(--amber)}.p-non{background:rgba(229,87,95,.16);color:var(--red)}
   .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}@media(max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.cards{grid-template-columns:1fr}}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.18s;position:relative}.card:hover{transform:translateY(-3px);border-color:rgba(217,165,70,.55);box-shadow:0 12px 30px rgba(0,0,0,.35)}
   .ph{height:148px;position:relative;display:grid;place-items:center;cursor:pointer}.ph svg{width:78%;opacity:.92}
@@ -108,7 +109,13 @@
   .spec{display:grid;grid-template-columns:1fr 1fr;gap:9px 16px;font-size:13px}.spec .k{color:var(--faint)}.spec .v{text-align:right;font-family:var(--mono)}
   .timer{font-family:var(--mono);font-size:29px;font-weight:700;text-align:center}.timer.urgent{color:var(--red);animation:pulse 1s infinite}@keyframes pulse{50%{opacity:.55}}
   .timer-l{text-align:center;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin-bottom:4px}
-  .cur{text-align:center;margin:14px 0}.cur .bv{font-family:var(--mono);font-size:31px;font-weight:700}.cur .rs{font-size:11px;font-family:var(--mono)}
+  .cur{text-align:center;margin:14px 0;position:relative}.cur .bv{font-family:var(--mono);font-size:31px;font-weight:700;display:inline-block;transition:color .2s}.cur .rs{font-size:11px;font-family:var(--mono)}
+  .cur .bv.flash{animation:bidFlash .7s ease}
+  @keyframes bidFlash{0%{color:var(--gold);transform:scale(1.22)}60%{color:var(--acc)}100%{color:var(--ink);transform:scale(1)}}
+  .bidbump{position:absolute;top:-6px;left:50%;transform:translateX(-50%);font-family:var(--mono);font-weight:800;color:var(--acc);font-size:14px;pointer-events:none;animation:bidBumpUp 1.6s ease forwards}
+  @keyframes bidBumpUp{0%{opacity:0;transform:translate(-50%,8px)}25%{opacity:1;transform:translate(-50%,-6px)}80%{opacity:1}100%{opacity:0;transform:translate(-50%,-26px)}}
+  .livedot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--red);margin-right:6px;animation:liveDot 1.4s ease infinite}
+  @keyframes liveDot{0%,100%{opacity:1}50%{opacity:.25}}
   .bidbar{display:flex;gap:8px;margin-top:12px}.bidbar input{flex:1;background:var(--bg);border:1px solid var(--line);border-radius:10px;color:var(--ink);font-family:var(--mono);font-size:15px;padding:11px;outline:none}.bidbar input:focus{border-color:var(--gold)}
   .hist{margin-top:14px;max-height:120px;overflow-y:auto;font-family:var(--mono);font-size:12px}.hist .h{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line);color:var(--dim)}.hist .h:first-child{color:var(--acc)}
   .oppbox{background:linear-gradient(135deg,rgba(67,201,140,.11),rgba(217,165,70,.07));border:1px solid rgba(67,201,140,.3);border-radius:14px;padding:15px;margin-top:16px}.oppbox .big{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--acc)}
@@ -156,9 +163,16 @@
 
 <section class="view" id="view-browse"><div class="vw" style="padding-top:22px">
   <h1 class="ph2">Browse auctions</h1><p class="sub" style="color:var(--faint);margin-bottom:14px">Filter, compare, and save searches.</p>
+  <div class="how" style="grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px" id="statusTabs">
+    <button class="howstep" data-status="live" style="cursor:pointer;text-align:center;padding:11px;border-top-width:2px"><b>🔴 Live now</b></button>
+    <button class="howstep" data-status="upcoming" style="cursor:pointer;text-align:center;padding:11px;border-top-width:2px"><b>📅 Upcoming</b></button>
+    <button class="howstep" data-status="ended" style="cursor:pointer;text-align:center;padding:11px;border-top-width:2px"><b>✅ Ended / sold</b></button>
+  </div>
   <div class="filters">
-    <div class="f grow"><label>Search</label><input class="ctrl" id="fSearch" placeholder="make, model…"></div>
+    <div class="f grow"><label>Search</label><input class="ctrl" id="fSearch" placeholder="e.g. BMW 2020"></div>
     <div class="f"><label>Make</label><select class="ctrl" id="fMake"></select></div>
+    <div class="f"><label>Category</label><select class="ctrl" id="fCat"><option value="">Any</option><option>Hatchback</option><option>Saloon</option><option>Estate</option><option>SUV</option><option>Coupe</option><option>Convertible</option><option>MPV</option><option>Van</option><option>Other</option></select></div>
+    <div class="f"><label>Condition</label><select class="ctrl" id="fCond"><option value="">Any</option><option value="run">Runs &amp; drives</option><option value="non">Non-runner</option></select></div>
     <div class="f"><label>Fuel</label><select class="ctrl" id="fFuel"><option value="">Any</option><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div>
     <div class="f"><label>From year</label><select class="ctrl" id="fYear"><option value="0">Any</option><option>2015</option><option>2017</option><option>2019</option><option>2021</option></select></div>
     <div class="f"><label>Max price</label><select class="ctrl" id="fPrice"><option value="0">Any</option><option value="5000">£5,000</option><option value="10000">£10,000</option><option value="15000">£15,000</option><option value="20000">£20,000</option><option value="30000">£30,000</option></select></div>
@@ -176,7 +190,9 @@
       <div class="fld"><label>Registration</label><input id="sReg" placeholder="AB12 CDE" style="text-transform:uppercase"></div>
       <div class="grid2"><div class="fld"><label>Make</label><input id="sMake"></div><div class="fld"><label>Model</label><input id="sModel"></div>
       <div class="fld"><label>Year</label><input id="sYear" type="number" placeholder="2019"></div><div class="fld"><label>Mileage</label><input id="sMileage" type="number" placeholder="48000"></div>
-      <div class="fld"><label>Fuel</label><select id="sFuel"><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div><div class="fld"><label>Gearbox</label><select id="sTrans"><option>Manual</option><option>Auto</option></select></div></div>
+      <div class="fld"><label>Fuel</label><select id="sFuel"><option>Petrol</option><option>Diesel</option><option>Hybrid</option><option>Electric</option></select></div><div class="fld"><label>Gearbox</label><select id="sTrans"><option>Manual</option><option>Auto</option></select></div>
+      <div class="fld"><label>Category</label><select id="sCat"><option>Hatchback</option><option>Saloon</option><option>Estate</option><option>SUV</option><option>Coupe</option><option>Convertible</option><option>MPV</option><option>Van</option><option>Other</option></select></div><div class="fld"><label>Condition</label><select id="sRunner"><option value="run">Runs &amp; drives</option><option value="non">Non-runner / project</option></select></div></div>
+    </div>
       <div class="fld"><label>Description / known faults</label><textarea id="sDesc" rows="2"></textarea></div>
     </div>
     <div class="sstep" data-step="2" style="display:none">
@@ -335,12 +351,12 @@
 
   function mk(o){o.t=o.year+' '+o.make+' '+o.model;o.mi=o.mileage.toLocaleString()+' mi · '+o.fuel+' · '+o.trans;return o;}
   function seed(){const n=Date.now();return [
-    mk({id:'c1',make:'BMW',model:'320d M Sport',year:2019,mileage:48200,fuel:'Diesel',trans:'Auto',bid:11200,mkt:14300,res:11000,ends:n+864e5*2,plate:'YE19 KFA',owners:2,mot:'Mar 2026',svc:'Full BMW',insp:{ext:'Good',int:'Good',tyre:'Good',brk:'Good',obd:'No fault codes',body:'Minor kerbing alloy',by:'A. Shaw'},hist:[['trader_88',11200],['mcr_motors',10900]]}),
-    mk({id:'c2',make:'Audi',model:'A4 Avant',year:2018,mileage:61400,fuel:'Petrol',trans:'Auto',bid:9650,mkt:12100,res:9500,ends:n+864e5*3,plate:'WR18 OPN',owners:3,mot:'Jan 2026',svc:'Partial',insp:{ext:'Good',int:'Fair',tyre:'Good',brk:'Good',obd:'O2 sensor stored',body:'Light scratch tailgate',by:'R. Mills'},hist:[['forecourt_ldn',9650]]}),
-    mk({id:'c3',make:'Ford',model:'Fiesta ST',year:2020,mileage:29800,fuel:'Petrol',trans:'Manual',bid:13100,mkt:15400,res:12500,ends:n+36e5*8,plate:'LD20 TTR',owners:1,mot:'May 2026',svc:'Full Ford',insp:{ext:'Excellent',int:'Excellent',tyre:'Good',brk:'Good',obd:'No fault codes',body:'Excellent',by:'A. Shaw'},hist:[['hot_hatch_co',13100]]}),
-    mk({id:'c4',make:'Mercedes',model:'C220d',year:2017,mileage:72600,fuel:'Diesel',trans:'Auto',bid:8200,mkt:11000,res:8500,ends:n+864e5,plate:'FN17 BWE',owners:3,mot:'Feb 2026',svc:'Partial',insp:{ext:'Good',int:'Good',tyre:'Fair',brk:'Good',obd:'No fault codes',body:'Bumper scuff N/S/R',by:'R. Mills'},hist:[['star_cars',8200]]}),
-    mk({id:'c5',make:'Volkswagen',model:'Golf GTI',year:2021,mileage:24100,fuel:'Petrol',trans:'Auto',bid:18900,mkt:21200,res:18000,ends:n+864e5*4,plate:'KM21 GTI',owners:1,mot:'Aug 2026',svc:'Full VW',insp:{ext:'Excellent',int:'Excellent',tyre:'Excellent',brk:'Good',obd:'No fault codes',body:'Excellent',by:'A. Shaw'},hist:[['gti_world',18900]]}),
-    mk({id:'c6',make:'Vauxhall',model:'Corsa',year:2016,mileage:58900,fuel:'Petrol',trans:'Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',insp:{ext:'Fair',int:'Fair',tyre:'Fair',brk:'Fair',obd:'EML on — needs diag',body:'Panel scuffs',by:'R. Mills'},hist:[['budget_cars',3650]]})
+    mk({id:'c1',category:'Saloon',runner:'run',make:'BMW',model:'320d M Sport',year:2019,mileage:48200,fuel:'Diesel',trans:'Auto',bid:11200,mkt:14300,res:11000,ends:n+864e5*2,plate:'YE19 KFA',owners:2,mot:'Mar 2026',svc:'Full BMW',insp:{ext:'Good',int:'Good',tyre:'Good',brk:'Good',obd:'No fault codes',body:'Minor kerbing alloy',by:'A. Shaw'},hist:[['trader_88',11200],['mcr_motors',10900]]}),
+    mk({id:'c2',category:'Estate',runner:'run',make:'Audi',model:'A4 Avant',year:2018,mileage:61400,fuel:'Petrol',trans:'Auto',bid:9650,mkt:12100,res:9500,ends:n+864e5*3,plate:'WR18 OPN',owners:3,mot:'Jan 2026',svc:'Partial',insp:{ext:'Good',int:'Fair',tyre:'Good',brk:'Good',obd:'O2 sensor stored',body:'Light scratch tailgate',by:'R. Mills'},hist:[['forecourt_ldn',9650]]}),
+    mk({id:'c3',category:'Hatchback',runner:'run',make:'Ford',model:'Fiesta ST',year:2020,mileage:29800,fuel:'Petrol',trans:'Manual',bid:13100,mkt:15400,res:12500,ends:n+36e5*8,plate:'LD20 TTR',owners:1,mot:'May 2026',svc:'Full Ford',insp:{ext:'Excellent',int:'Excellent',tyre:'Good',brk:'Good',obd:'No fault codes',body:'Excellent',by:'A. Shaw'},hist:[['hot_hatch_co',13100]]}),
+    mk({id:'c4',category:'Saloon',runner:'run',make:'Mercedes',model:'C220d',year:2017,mileage:72600,fuel:'Diesel',trans:'Auto',bid:8200,mkt:11000,res:8500,ends:n+864e5,plate:'FN17 BWE',owners:3,mot:'Feb 2026',svc:'Partial',insp:{ext:'Good',int:'Good',tyre:'Fair',brk:'Good',obd:'No fault codes',body:'Bumper scuff N/S/R',by:'R. Mills'},hist:[['star_cars',8200]]}),
+    mk({id:'c5',category:'Hatchback',runner:'run',make:'Volkswagen',model:'Golf GTI',year:2021,mileage:24100,fuel:'Petrol',trans:'Auto',bid:18900,mkt:21200,res:18000,ends:n+864e5*4,plate:'KM21 GTI',owners:1,mot:'Aug 2026',svc:'Full VW',insp:{ext:'Excellent',int:'Excellent',tyre:'Excellent',brk:'Good',obd:'No fault codes',body:'Excellent',by:'A. Shaw'},hist:[['gti_world',18900]]}),
+    mk({id:'c6',category:'Hatchback',runner:'non',make:'Vauxhall',model:'Corsa',year:2016,mileage:58900,fuel:'Petrol',trans:'Manual',bid:3650,mkt:5100,res:3500,ends:n+36e5*20,plate:'YA16 CRS',owners:4,mot:'Dec 2025',svc:'None',insp:{ext:'Fair',int:'Fair',tyre:'Fair',brk:'Fair',obd:'EML on — needs diag',body:'Panel scuffs',by:'R. Mills'},hist:[['budget_cars',3650]]})
   ];}
 
   let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[],apps=[],chat=[];
@@ -359,14 +375,30 @@
   const cardHTML=c=>{const opp=c.mkt-c.bid,w=user&&user.watch&&user.watch.includes(c.id),inC=compare.includes(c.id),ph0=c.photos&&c.photos[0],st=carState(c);return `<div class="card">
     <div class="ph" data-open="${c.id}" style="${ph0?`background:#0E1611 center/cover url('${ph0}')`:'background:linear-gradient(135deg,#1B2A20,#0E1611)'}"><span class="ver pill p-ver">✓ VERIFIED</span>${st==='sold'?'<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,20,.62);color:#fff;font-weight:800;letter-spacing:.2em;font-size:18px">SOLD</span>':st==='ended'?'<span style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(10,14,20,.55);color:#fff;font-weight:800;letter-spacing:.2em;font-size:16px">ENDED</span>':''}
       <div class="acts"><button class="ico cmp ${inC?'on':''}" data-cmp="${c.id}" title="Compare">⇄</button><button class="ico ${w?'on':''}" data-star="${c.id}" title="Watch">${w?'★':'☆'}</button></div>${ph0?'':carSVG(c.id)}<span class="cnt" data-cnt="${c.id}">--</span></div>
-    <div class="cb" data-open="${c.id}"><h3>${c.t}</h3><div class="meta">${c.mi} · ${c.owners} own</div>
+    <div class="cb" data-open="${c.id}"><h3>${c.t}</h3><div class="meta">${c.mi} · ${c.owners} own${c.category?' · '+esc(c.category):''}${(c.runner||'run')==='non'?' · <span class="pill p-non" style="vertical-align:1px">NON-RUNNER</span>':''}</div>
       <div class="bidrow"><div><div class="bl">Current bid</div><div class="bv">${gbp(c.bid)}</div></div>${opp>0?`<div class="opp">+${gbp(opp)}</div>`:''}</div>
       <div class="res ${reserveMet(c)?'met':'no'}">${st==='upcoming'?'🗓 Starts '+fmtWhen(c.starts):reserveMet(c)?'✓ Reserve met':'Reserve not met'}</div></div></div>`;};
 
   function renderHome(){const live=cars.filter(c=>carState(c)==='live'),up=cars.filter(c=>carState(c)==='upcoming').sort((a,b)=>a.starts-b.starts);$('#oppCards').innerHTML=[...live].sort((a,b)=>(b.mkt-b.bid)-(a.mkt-a.bid)).slice(0,3).map(cardHTML).join('')||'<div class="empty">No live auctions right now.</div>';$('#soonCards').innerHTML=[...live].sort((a,b)=>a.ends-b.ends).slice(0,3).map(cardHTML).join('')||'<div class="empty">No live auctions right now.</div>';const us=$('#upcomingSec');if(us){if(up.length){us.style.display='';$('#upcomingCards').innerHTML=up.slice(0,6).map(cardHTML).join('');}else us.style.display='none';}}
-  function matches(f){return cars.filter(c=>(!f.q||c.t.toLowerCase().includes(f.q))&&(!f.make||c.make===f.make)&&(!f.fuel||c.fuel===f.fuel)&&(!f.year||c.year>=f.year)&&(!f.price||c.bid<=f.price));}
-  function curFilters(){return{q:($('#fSearch').value||'').toLowerCase(),make:$('#fMake').value,fuel:$('#fFuel').value,year:+$('#fYear').value,price:+$('#fPrice').value};}
-  function renderBrowse(){const f=curFilters(),sort=$('#fSort').value;let l=matches(f);l.sort((a,b)=>sort==='soon'?a.ends-b.ends:sort==='opp'?(b.mkt-b.bid)-(a.mkt-a.bid):sort==='low'?a.bid-b.bid:b.bid-a.bid);$('#browseCards').innerHTML=l.map(cardHTML).join('');$('#browseEmpty').style.display=l.length?'none':'block';}
+  let browseStatus='live';
+  function matches(f){const words=f.q?f.q.split(/\s+/).filter(Boolean):[];return cars.filter(c=>{
+    const text=(c.t+' '+(c.category||'')+' '+(c.fuel||'')+' '+(c.trans||'')).toLowerCase();
+    if(words.length&&!words.every(w=>text.includes(w)))return false;
+    if(f.make&&c.make!==f.make)return false;
+    if(f.cat&&(c.category||'')!==f.cat)return false;
+    if(f.cond==='non'&&(c.runner||'run')!=='non')return false;
+    if(f.cond==='run'&&(c.runner||'run')==='non')return false;
+    if(f.fuel&&c.fuel!==f.fuel)return false;
+    if(f.year&&c.year<f.year)return false;
+    if(f.price&&c.bid>f.price)return false;
+    const st=carState(c);
+    if(f.status==='ended'){if(st!=='ended'&&st!=='sold')return false;}else if(f.status&&st!==f.status)return false;
+    return true;
+  });}
+  function curFilters(){return{q:($('#fSearch').value||'').toLowerCase(),make:$('#fMake').value,fuel:$('#fFuel').value,year:+$('#fYear').value,price:+$('#fPrice').value,cat:$('#fCat').value,cond:$('#fCond').value,status:browseStatus};}
+  function renderBrowse(){const f=curFilters(),sort=$('#fSort').value;let l=matches(f);l.sort((a,b)=>sort==='soon'?a.ends-b.ends:sort==='opp'?(b.mkt-b.bid)-(a.mkt-a.bid):sort==='low'?a.bid-b.bid:b.bid-a.bid);$('#browseCards').innerHTML=l.map(cardHTML).join('');$('#browseEmpty').style.display=l.length?'none':'block';
+    const counts={live:0,upcoming:0,ended:0};cars.forEach(c=>{const st=carState(c);if(st==='live')counts.live++;else if(st==='upcoming')counts.upcoming++;else counts.ended++;});
+    $$('#statusTabs [data-status]').forEach(b=>{const s=b.dataset.status;b.classList.toggle('active',s===browseStatus);const label=s==='live'?'🔴 Live now':s==='upcoming'?'📅 Upcoming':'✅ Ended / sold';b.innerHTML=`<b>${label}</b><div style="font-size:11px;color:var(--faint);margin-top:3px">${counts[s]} car${counts[s]===1?'':'s'}</div>`;});}
   function renderDash(){
     const a=myApp();const steps=user?[a?(a.status==='approved'?'✓ Trade access approved':a.status==='rejected'?'✕ Application not approved — contact us':'⏳ Application under review (within 1 working day)'):'1️⃣ Apply for trade access',user.verified?'✓ ID verified':'2️⃣ Verify your ID',user.member?'✓ Member':'3️⃣ £49 membership'].join(' &nbsp;·&nbsp; '):'';
     $('#kycBanner').innerHTML=user?`🪪 <span>Signed in as <b style="color:var(--ink)">${esc(user.name)}</b> &nbsp;·&nbsp; ${steps}${(!a||(a.status!=='approved')||!user.verified||!user.member)?' &nbsp;<button class="btn btn-acc btn-sm" id="contOnboard">Continue setup</button>':''}</span>`:'🪪 <span>Not signed in — tap "Sign in" to get started. Browsing is free.</span>';
@@ -448,14 +480,15 @@
     const qq=e.target.closest('[data-quote]');if(qq){if(!needName())return;const id=qq.dataset.quote;const pe=document.querySelector('[data-qp="'+id+'"]'),de=document.querySelector('[data-qd="'+id+'"]');const price=+(pe&&pe.value);const days=+(de&&de.value)||3;if(!price){toast('Enter a price');return;}const req=quotes.find(x=>x.id===id);if(req){req.list.push({mech:user.name,price,days,time:Date.now()});await saveQuotes();renderMech();toast('Quote submitted ✓');}return;}
     const ac=e.target.closest('[data-accept]');if(ac){const parts=ac.dataset.accept.split('|');const req=quotes.find(x=>x.id===parts[0]);if(req){req.status='accepted';req.accepted=+parts[1];await saveQuotes();renderMech();toast('Quote accepted ✓');}return;}
   });
-  ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{if(['fSearch','fMake','fFuel','fYear','fPrice','fSort'].includes(e.target.id))renderBrowse();}));
+  ['input','change'].forEach(ev=>document.addEventListener(ev,e=>{if(['fSearch','fMake','fFuel','fYear','fPrice','fSort','fCat','fCond'].includes(e.target.id))renderBrowse();}));
+  document.addEventListener('click',e=>{const tb=e.target.closest('#statusTabs [data-status]');if(tb){browseStatus=tb.dataset.status;renderBrowse();}});
 
   // inspect & approve
   let inspIdx=null;
   function openInspect(i){inspIdx=i;const p=pending[i];$('#inspTitle').textContent=p.t;$('#iObd').value='No fault codes';$('#iBody').value=p.desc||'';$('#iInsp').value='';$('#iDate').value='';$('#inspModal').classList.add('on');}
   $('#iCancel').onclick=()=>$('#inspModal').classList.remove('on');
   $('#iApprove').onclick=async()=>{const p=pending.splice(inspIdx,1)[0];if($('#iMkt').value)p.mkt=+$('#iMkt').value;p.valBy=$('#iMkt').value?'inspection':'seller';const insp={ext:$('#iExt').value,int:$('#iInt').value,tyre:$('#iTyre').value,brk:$('#iBrk').value,obd:$('#iObd').value||'No fault codes',body:$('#iBody').value||'See report',by:$('#iInsp').value||'Inspector'};
-    const _sm=p.start?new Date(p.start).getTime():Date.now();const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,starts:_sm,ends:_sm+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,photos:p.photos||[],by:p.by,byKey:p.byKey,bin:p.bin||0,valBy:p.valBy||'seller',hist:[['opening_bid',Math.round(p.res*0.8)]]});
+    const _sm=p.start?new Date(p.start).getTime():Date.now();const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',category:p.category||'Other',runner:p.runner||'run',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,starts:_sm,ends:_sm+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,photos:p.photos||[],by:p.by,byKey:p.byKey,bin:p.bin||0,valBy:p.valBy||'seller',hist:[['opening_bid',Math.round(p.res*0.8)]]});
     cars.push(car);tops[car.id]='opening_bid';await savePending();await saveCars();$('#inspModal').classList.remove('on');toast('Inspected & listed live ✓');if(p.by===(user&&user.name)){/* lister notify handled below */}addNotif('Your listing "'+p.t+'" passed inspection and is now live.');renderAdmin();renderHome();};
 
   // seller flow
@@ -467,9 +500,9 @@
   $('#sNext').onclick=async()=>{
     if(step===1&&!$('#sMake').value){toast('Add at least the make');return;}
     if(step===4){if(!needName())return;
-      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,bin:+$('#sBin').value||0,start:$('#sStart').value,photos:sellPhotos.slice(),by:user.name,byKey:user.key});
+      pending.push({make:$('#sMake').value,model:$('#sModel').value,year:$('#sYear').value,mileage:$('#sMileage').value,fuel:$('#sFuel').value,trans:$('#sTrans').value,category:$('#sCat').value,runner:$('#sRunner').value,t:($('#sYear').value+' '+$('#sMake').value+' '+$('#sModel').value).trim(),mi:(($('#sMileage').value||'?'))+' mi · '+$('#sFuel').value+' · '+$('#sTrans').value,res:+$('#sReserve').value||5000,mkt:+$('#sMkt').value||0,plate:$('#sReg').value.toUpperCase(),desc:$('#sDesc').value,len:+$('#sLen').value,bin:+$('#sBin').value||0,start:$('#sStart').value,photos:sellPhotos.slice(),by:user.name,byKey:user.key});
       await savePending();addNotif('Your car was submitted for inspection.');toast('Submitted to verification queue ✓');
-      step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt','sBin','sStart'].forEach(i=>$('#'+i).value='');sellPhotos=[];renderSellPhotos();if($('#sPhotoStatus'))$('#sPhotoStatus').textContent='';if($('#sPhotos'))$('#sPhotos').value='';go('admin');return;}
+      step=1;showStep();['sReg','sMake','sModel','sYear','sMileage','sDesc','sReserve','sMkt','sBin','sStart'].forEach(i=>$('#'+i).value='');$('#sCat').value='Hatchback';$('#sRunner').value='run';sellPhotos=[];renderSellPhotos();if($('#sPhotoStatus'))$('#sPhotoStatus').textContent='';if($('#sPhotos'))$('#sPhotos').value='';go('admin');return;}
     step++;showStep();};
   $('#sBack').onclick=()=>{if(step>1)step--;showStep();};
 
@@ -495,7 +528,7 @@
         <div class="finbox"><h4 style="margin:0;font-size:11px;letter-spacing:.13em;text-transform:uppercase;color:var(--dim)">How payment works <span style="color:var(--faint);text-transform:none;letter-spacing:0">· demo</span></h4>
           <div class="flow"><div class="st"><b>1 · Deposit</b>£500 refundable to bid</div><div class="st"><b>2 · Win &amp; pay</b>balance on win</div><div class="st"><b>3 · Escrow</b>released on collection</div></div></div>
       </div><div>
-        <div class="box flat"><div class="timer-l">${carState(c)==='upcoming'?'Auction starts in':carState(c)==='ended'?'Auction ended':carState(c)==='sold'?'Sold':'Auction ends in'}</div><div class="timer" id="bigTimer">--</div>
+        <div class="box flat"><div class="timer-l">${carState(c)==='upcoming'?'Auction starts in':carState(c)==='ended'?'Auction ended':carState(c)==='sold'?'Sold':'<span class="livedot"></span>Auction ends in'}</div><div class="timer" id="bigTimer">--</div>
           <div class="cur"><div class="timer-l">Current bid</div><div class="bv" id="curBid">${gbp(c.bid)}</div><div class="rs" id="resStat"></div></div>
           <div class="bidbar"><input id="bidIn" type="number" placeholder="${c.bid+100}"><button class="btn btn-acc" id="bidBtn">Place bid</button></div>
           ${c.bin&&!c.sold?`<button class="btn btn-sm" id="binBtn" style="width:100%;margin-top:8px;background:var(--gold);color:#1a1205;font-weight:700">⚡ Buy It Now · ${gbp(c.bin)}</button>`:''}${c.sold?`<div style="margin-top:10px;text-align:center;color:var(--red);font-weight:800;letter-spacing:.18em">SOLD${c.soldTo?' · to '+esc(c.soldTo):''}</div>`:''}
@@ -516,7 +549,8 @@
   }
   const BUYER_FEE=0.05;
   function repairsFor(id){return quotes.filter(q=>q.carId===id&&q.status==='accepted'&&q.list[q.accepted]).reduce((s,q)=>s+(+q.list[q.accepted].price||0),0);}
-  function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const fee=Math.round(c.bid*BUYER_FEE),rep=repairsFor(c.id),tr=+($('#oppTrans')&&$('#oppTrans').value)||0,allIn=c.bid+fee+rep+tr,p=c.mkt-allIn;$('#oppBig').textContent=(p>=0?'+':'')+gbp(p);$('#oppBig').style.color=p>0?'var(--acc)':'var(--red)';$('#oppSub').textContent=(c.valBy==='inspection'?'Value assessed at inspection: ':'Seller estimate: ')+gbp(c.mkt);if($('#oppRows'))$('#oppRows').innerHTML=[['Current bid',c.bid],['Buyer fee (5%)',fee],['Repairs (accepted quotes)',rep],['Transport',tr]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--faint)">${k}</span><span>${gbp(v)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--line);margin-top:4px"><span style="color:var(--dim)">All-in cost</span><b>${gbp(allIn)}</b></div>`;$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
+  let lastBidShown={};
+  function refreshModal(){const c=getActive();if(!c||!$('#curBid'))return;const prev=lastBidShown[c.id];if(prev!==undefined&&c.bid>prev){const el=$('#curBid');el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash');const cur=$('.cur');if(cur){const b=document.createElement('div');b.className='bidbump';b.textContent='+'+gbp(c.bid-prev);cur.appendChild(b);setTimeout(()=>b.remove(),1700);}}lastBidShown[c.id]=c.bid;$('#curBid').textContent=gbp(c.bid);$('#resStat').innerHTML=reserveMet(c)?'<span style="color:var(--acc)">✓ Reserve met</span>':'<span style="color:var(--amber)">Reserve not met</span>';const fee=Math.round(c.bid*BUYER_FEE),rep=repairsFor(c.id),tr=+($('#oppTrans')&&$('#oppTrans').value)||0,allIn=c.bid+fee+rep+tr,p=c.mkt-allIn;$('#oppBig').textContent=(p>=0?'+':'')+gbp(p);$('#oppBig').style.color=p>0?'var(--acc)':'var(--red)';$('#oppSub').textContent=(c.valBy==='inspection'?'Value assessed at inspection: ':'Seller estimate: ')+gbp(c.mkt);if($('#oppRows'))$('#oppRows').innerHTML=[['Current bid',c.bid],['Buyer fee (5%)',fee],['Repairs (accepted quotes)',rep],['Transport',tr]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--faint)">${k}</span><span>${gbp(v)}</span></div>`).join('')+`<div style="display:flex;justify-content:space-between;padding:4px 0;border-top:1px solid var(--line);margin-top:4px"><span style="color:var(--dim)">All-in cost</span><b>${gbp(allIn)}</b></div>`;$('#hist').innerHTML=(c.hist||[]).slice(0,8).map(h=>`<div class="h"><span>${h[0]}</span><span>${gbp(h[1])}</span></div>`).join('');}
   async function placeBid(){if(!requireMember())return;if(!user.deposited){$('#depModal').classList.add('on');return;}const c=getActive();if(!c)return;if(c.sold){toast('This car has been sold');return;}if(carState(c)==='upcoming'){toast('Bidding opens '+fmtWhen(c.starts));return;}if(Date.now()>c.ends){toast('This auction has ended');return;}const v=parseInt($('#bidIn').value);if(!v||v<=c.bid){toast('Bid must beat '+gbp(c.bid));return;}
     if(!sb){toast('Bidding works on the live site');return;}
     const btn=$('#bidBtn');if(btn){btn.disabled=true;btn.textContent='Placing bid…';}
