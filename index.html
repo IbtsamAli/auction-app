@@ -321,7 +321,7 @@
   ];}
 
   let cars=[],pending=[],user=null,compare=[],tops={},quotes=[],sellPhotos=[],qa=[],apps=[];
-  const ADMIN_EMAILS=['asphatscrt@gmail.com'];
+  const ADMIN_EMAILS=['asphaltscrt@gmail.com'];
   function isAdmin(){return !!(user&&user.email&&ADMIN_EMAILS.includes(String(user.email).toLowerCase()));}
   async function loadAll(){cars=await sget('vaa_auctions',true);if(!cars){cars=seed();await sset('vaa_auctions',cars,true);}pending=await sget('vaa_pending',true)||[];quotes=await sget('vaa_quotes',true)||[];qa=await sget('vaa_qa',true)||[];apps=await sget('vaa_applications',true)||[];cars.forEach(c=>tops[c.id]=c.hist&&c.hist[0]?c.hist[0][0]:null);}
   function carState(c){const now=Date.now();if(c.sold)return 'sold';if(c.starts&&now<c.starts)return 'upcoming';if(now>=c.ends)return 'ended';return 'live';}
