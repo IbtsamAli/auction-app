@@ -222,7 +222,7 @@
   <div class="box"><h4>Open jobs — send a quote</h4><div id="mechList"></div></div>
 </div></section>
 
-<div class="foot">Verified Auctions — operated by Samhorizon Hub Limited · Trade members only · Payments and ID checks run in Stripe test mode while we complete launch checks.</div>
+<div class="foot">Verified Auctions — operated by Samhorizon Hub Limited · Trade members only · Payments and ID checks run in Stripe test mode while we complete launch checks. · <a href="#" id="footPrivLink" style="color:var(--gold)">Privacy &amp; cookies</a></div>
 
 <div class="ctray" id="ctray"><span class="cl" id="ctrayLbl"></span><button class="btn btn-acc btn-sm" id="ctrayGo">Compare</button><button class="btn btn-ghost btn-sm" id="ctrayClear">Clear</button></div>
 <div class="ov" id="ov"><div class="dt" id="dt"></div></div>
@@ -258,6 +258,16 @@
 
 <div class="modal" id="depModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Deposit to bid</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">A refundable <b style="color:var(--ink)">£500</b> deposit is held while you bid. <b style="color:var(--gold)">Test mode — pay with card 4242 4242 4242 4242, any future expiry &amp; CVC. No real money moves.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="depCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="depPay" style="flex:1">Place £500 deposit</button></div></div></div>
 <div class="modal" id="memModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Become a member</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">Verified Auctions is members-only for bidding, buying and selling. A one-off <b style="color:var(--ink)">£49</b> membership unlocks full access. <b style="color:var(--gold)">Test mode — pay with card 4242 4242 4242 4242, any future expiry &amp; CVC.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="memCancel" style="flex:1">Not now</button><button class="btn btn-acc btn-sm" id="memPay" style="flex:1">Pay £49 &amp; join</button></div></div></div>
+<div class="modal" id="privModal"><div class="m" style="max-width:520px;position:relative;max-height:80vh;overflow-y:auto">
+  <button id="privX" aria-label="Close" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:15px">✕</button>
+  <h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:0 0 12px">Privacy &amp; cookies</h4>
+  <div style="font-size:13px;color:var(--dim);line-height:1.6">
+  <p><b style="color:var(--ink)">Essential cookies</b> keep you signed in and the platform secure. These are always on and can't be switched off.</p>
+  <p><b style="color:var(--ink)">Analytics cookies</b> help us understand how the platform is used, only with your consent.</p>
+  <p>We're operated by Samhorizon Hub Limited, trading as Verified Auctions. Your data is used to run your account, process bids and payments (via Stripe), and verify your trade status. We don't sell your data. You can request access to, correction of, or deletion of your data at any time by contacting us.</p>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-ghost btn-sm" id="privReject" style="flex:1">Essential only</button><button class="btn btn-acc btn-sm" id="privAccept" style="flex:1">Accept all</button></div>
+</div></div>
 <div class="modal" id="kycModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Verify your identity</h4><p style="font-size:14px;color:var(--dim);margin:0 0 14px">To keep the marketplace safe, we verify every member. You'll take a quick photo of your ID and a selfie — handled securely by Stripe; we never see your documents. <b style="color:var(--gold)">Test mode — you can complete the test verification without real ID.</b></p><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="kycCancel" style="flex:1">Not now</button><button class="btn btn-acc btn-sm" id="kycStart" style="flex:1">Start verification</button></div></div></div>
 <div class="modal" id="appModal"><div class="m" style="max-width:520px"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:0 0 6px">Apply for trade access</h4><p style="font-size:13px;color:var(--dim);margin:0 0 14px">Verified Auctions is a vetted trade marketplace. Tell us about your business and upload your documents — applications are reviewed within 1 working day.</p>
   <div class="grid2"><div class="fld"><label>Business / trading name *</label><input id="apBiz"></div><div class="fld"><label>Company number (if Ltd)</label><input id="apCo" placeholder="optional"></div></div>
@@ -270,6 +280,10 @@
   <p style="font-size:11px;color:var(--faint);margin:12px 0 0">Documents are stored privately and only viewed by our review team to verify your trade status.</p></div></div>
 <div class="modal" id="reqModal"><div class="m"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 12px">Request repair quotes</h4><div id="reqCar" style="font-weight:700;margin-bottom:10px"></div><textarea class="ctrl" id="reqIssue" rows="3" placeholder="What needs doing? e.g. front discs & pads, DPF light, O/S/F alloy refurb" style="width:100%;margin-bottom:12px"></textarea><div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="reqCancel" style="flex:1">Cancel</button><button class="btn btn-acc btn-sm" id="reqSend" style="flex:1">Send to mechanics</button></div></div></div>
 <div class="toast" id="toast"></div>
+<div id="cookieBanner" style="position:fixed;left:12px;right:12px;bottom:12px;z-index:95;background:var(--panel);border:1px solid var(--line);border-top:2px solid var(--gold);border-radius:14px;padding:14px 16px;box-shadow:0 12px 36px rgba(0,0,0,.5);display:none;max-width:560px;margin:0 auto">
+  <p style="margin:0 0 10px;font-size:13px;color:var(--dim);line-height:1.5">We use essential cookies to run Verified Auctions (sign-in, security) and, with your consent, analytics to improve the site. See our <a href="#" id="cookiePolicyLink" style="color:var(--gold)">Privacy &amp; Cookie policy</a>.</p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" id="cookieReject" style="flex:1">Essential only</button><button class="btn btn-acc btn-sm" id="cookieAccept" style="flex:1">Accept all</button></div>
+</div>
 
 <script>
 (function(){
@@ -367,6 +381,13 @@
   async function doLogout(){if(sb){try{await sb.auth.signOut();}catch(e){}}user=null;updateWho();renderBell();renderCurrent();toast('Logged out');}
   $('#signBtn').onclick=()=>{ if(user)doLogout(); else openSign(); };
   setAuthMode('login');
+  function applyConsent(v){localStorage.setItem('va_cookie_consent',v);$('#cookieBanner').style.display='none';$('#privModal').classList.remove('on');if(v==='all'){/* analytics could be initialised here */}}
+  (function initCookieBanner(){const c=localStorage.getItem('va_cookie_consent');if(!c)$('#cookieBanner').style.display='block';})();
+  $('#cookieAccept').onclick=()=>applyConsent('all');$('#cookieReject').onclick=()=>applyConsent('essential');$('#privAccept').onclick=()=>applyConsent('all');$('#privReject').onclick=()=>applyConsent('essential');
+  $('#cookiePolicyLink').onclick=e=>{e.preventDefault();$('#privModal').classList.add('on');};
+  if($('#footPrivLink'))$('#footPrivLink').onclick=e=>{e.preventDefault();$('#privModal').classList.add('on');};
+  $('#privX').onclick=()=>$('#privModal').classList.remove('on');
+  $('#privModal').onclick=e=>{if(e.target===$('#privModal'))$('#privModal').classList.remove('on');};
   function updateWho(){$('#whoLbl').textContent=user?('👤 '+user.name+(user.verified?' · ✓ ID':'')+(user.member?' · Member':'')):'';$('#signBtn').textContent=user?'Log out':'Sign in';const na=$('#navAdmin');if(na)na.style.display=isAdmin()?'':'none';}
 
   // notifications popover
