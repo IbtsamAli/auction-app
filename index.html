@@ -228,14 +228,16 @@
 <div class="ov" id="ov"><div class="dt" id="dt"></div></div>
 <div class="ov" id="cmpOv"><div class="dt" id="cmpDt" style="max-width:900px"></div></div>
 
-<div class="modal" id="signModal"><div class="m">
-  <h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 14px">Sign in</h4>
+<div class="modal" id="signModal"><div class="m" style="position:relative">
+  <button id="signX" aria-label="Close" style="position:absolute;top:10px;right:10px;width:30px;height:30px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);font-size:15px">✕</button>
+  <h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:0 0 14px">Sign in or create account</h4>
   <div id="authReal">
+    <input class="ctrl" id="authName" placeholder="Full name (new accounts)" style="width:100%;margin-bottom:8px">
     <input class="ctrl" id="authEmail" type="email" placeholder="you@email.com" style="width:100%;margin-bottom:8px">
     <input class="ctrl" id="authPw" type="password" placeholder="Password (6+ characters)" style="width:100%;margin-bottom:12px">
     <div style="display:flex;gap:8px"><button class="btn btn-ghost btn-sm" id="btnLogin" style="flex:1">Log in</button><button class="btn btn-acc btn-sm" id="btnSignup" style="flex:1">Create account</button></div>
   </div>
-  <p style="font-size:11px;color:var(--faint);margin:12px 0 0">Your email is only used to log in.</p>
+  <p style="font-size:11px;color:var(--faint);margin:12px 0 0">New accounts go on to complete a short trade application — reviewed within 1 working day.</p>
 </div></div>
 
 <div class="modal" id="inspModal"><div class="m" style="max-width:460px"><h4 style="font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);margin:0 0 14px">Inspection report</h4>
@@ -351,9 +353,11 @@
   async function loadUserData(key,name,email){const d=await sget('vaa_u_'+key,false)||{};user={key,name:name||d.name||'user',email:email||null,watch:d.watch||[],searches:d.searches||[],notifs:d.notifs||[],deposited:!!d.deposited,payIntent:d.payIntent||null,wonNotified:d.wonNotified||[],member:!!d.member,verified:!!d.verified,verifyId:d.verifyId||null};}
   function openSign(){if(!sb){toast('Reconnecting — please refresh and try again');return;}$('#signModal').classList.add('on');}
   function needName(){if(!user){openSign();return false;}return true;}
-  async function afterAuth(){const {data:{user:au}}=await sb.auth.getUser();if(!au)return;await loadUserData(au.id,(au.email||'user').split('@')[0],au.email);$('#signModal').classList.remove('on');updateWho();renderBell();renderCurrent();toast('Signed in as '+user.name);}
+  async function afterAuth(openApp){const {data:{user:au}}=await sb.auth.getUser();if(!au)return;const nm=(au.user_metadata&&au.user_metadata.name)||(au.email||'user').split('@')[0];await loadUserData(au.id,nm,au.email);$('#signModal').classList.remove('on');updateWho();renderBell();renderCurrent();toast('Signed in as '+user.name);if(openApp&&!myApp())$('#appModal').classList.add('on');}
   async function doLogin(){const em=($('#authEmail').value||'').trim(),pw=$('#authPw').value;if(!em||!pw){toast('Enter email and password');return;}const {error}=await sb.auth.signInWithPassword({email:em,password:pw});if(error){toast(error.message);return;}await afterAuth();}
-  async function doSignup(){const em=($('#authEmail').value||'').trim(),pw=$('#authPw').value;if(!em||pw.length<6){toast('Email + password (6+ chars)');return;}const {data,error}=await sb.auth.signUp({email:em,password:pw});if(error){toast(error.message);return;}if(data.session){await afterAuth();}else{toast('Account made — confirm via the email we sent, then log in.');}}
+  async function doSignup(){const nm=($('#authName').value||'').trim(),em=($('#authEmail').value||'').trim(),pw=$('#authPw').value;if(!nm){toast('Enter your full name');return;}if(!em||pw.length<6){toast('Email + password (6+ chars)');return;}const {data,error}=await sb.auth.signUp({email:em,password:pw,options:{data:{name:nm}}});if(error){toast(error.message);return;}if(data.session){await afterAuth(true);}else{toast('Account made — confirm via the email we sent, then log in.');}}
+  $('#signX').onclick=()=>$('#signModal').classList.remove('on');
+  $('#signModal').onclick=e=>{if(e.target===$('#signModal'))$('#signModal').classList.remove('on');};
   async function doLogout(){if(sb){try{await sb.auth.signOut();}catch(e){}}user=null;updateWho();renderBell();renderCurrent();toast('Logged out');}
   $('#signBtn').onclick=()=>{ if(user)doLogout(); else openSign(); };
   $('#btnLogin').onclick=doLogin;$('#btnSignup').onclick=doSignup;
