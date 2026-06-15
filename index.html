@@ -351,7 +351,7 @@
     return lget(k);
   }
   async function sset(k,v,sh){
-    if(sb){try{const {error}=await sb.from('app_state').upsert({key:k,value:v,updated_at:new Date().toISOString()},{onConflict:'key'});if(error)throw error;lset(k,v);return true;}catch(e){console.error('sset',e);lset(k,v);return false;}}
+    if(sb){try{const {data,error}=await sb.from('app_state').upsert({key:k,value:v,updated_at:new Date().toISOString()},{onConflict:'key'}).select();if(error)throw error;lset(k,v);if(!data||!data.length)return false;return true;}catch(e){console.error('sset',e);lset(k,v);return false;}}
     lset(k,v);return false;
   }
 
