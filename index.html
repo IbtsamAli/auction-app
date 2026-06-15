@@ -351,8 +351,8 @@
     return lget(k);
   }
   async function sset(k,v,sh){
-    if(sb){try{const {error}=await sb.from('app_state').upsert({key:k,value:v,updated_at:new Date().toISOString()},{onConflict:'key'});if(error)throw error;return;}catch(e){console.error('sset',e);}}
-    lset(k,v);
+    if(sb){try{const {error}=await sb.from('app_state').upsert({key:k,value:v,updated_at:new Date().toISOString()},{onConflict:'key'});if(error)throw error;lset(k,v);return true;}catch(e){console.error('sset',e);lset(k,v);return false;}}
+    lset(k,v);return false;
   }
 
   function mk(o){o.t=o.year+' '+o.make+' '+o.model;o.mi=o.mileage.toLocaleString()+' mi · '+o.fuel+' · '+o.trans;return o;}
@@ -499,7 +499,7 @@
   $('#iCancel').onclick=()=>$('#inspModal').classList.remove('on');
   $('#iApprove').onclick=async()=>{const p=pending.splice(inspIdx,1)[0];if($('#iMkt').value)p.mkt=+$('#iMkt').value;p.valBy=$('#iMkt').value?'inspection':'seller';const insp={ext:$('#iExt').value,int:$('#iInt').value,tyre:$('#iTyre').value,brk:$('#iBrk').value,obd:$('#iObd').value||'No fault codes',body:$('#iBody').value||'See report',by:$('#iInsp').value||'Inspector'};
     const _sm=p.start?new Date(p.start).getTime():Date.now();const car=mk({id:'u'+Date.now(),make:p.make,model:p.model,year:+p.year||2019,mileage:+p.mileage||0,fuel:p.fuel||'Petrol',trans:p.trans||'Manual',category:p.category||'Other',runner:p.runner||'run',bid:Math.round(p.res*0.8),mkt:p.mkt||Math.round(p.res*1.2),res:p.res,starts:_sm,ends:_sm+864e5*(p.len||3),plate:p.plate,owners:p.owners||2,mot:'2026',svc:'See report',insp,photos:p.photos||[],by:p.by,byKey:p.byKey,bin:p.bin||0,valBy:p.valBy||'seller',hist:[['opening_bid',Math.round(p.res*0.8)]]});
-    cars.push(car);tops[car.id]='opening_bid';await savePending();await saveCars();$('#inspModal').classList.remove('on');toast('Inspected & listed live ✓');if(p.by===(user&&user.name)){/* lister notify handled below */}addNotif('Your listing "'+p.t+'" passed inspection and is now live.');renderAdmin();renderHome();};
+    cars.push(car);tops[car.id]='opening_bid';const okP=await savePending();const okC=await saveCars();$('#inspModal').classList.remove('on');if(okC){toast('Inspected & listed live ✓');}else{toast('⚠️ Saved on this device only — sign out, clear site data, and sign in again, then re-approve');}addNotif('Your listing "'+p.t+'" passed inspection and is now live.');renderAdmin();renderHome();};
 
   // seller flow
   let step=1;
